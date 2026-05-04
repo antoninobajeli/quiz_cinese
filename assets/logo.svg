@@ -1,0 +1,18 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo circolare colorato -->
+  <circle cx="100" cy="100" r="95" fill="#FF69B4" stroke="#FF1493" stroke-width="5"/>
+
+  <!-- Panda stilizzato -->
+  <ellipse cx="100" cy="80" rx="40" ry="35" fill="#FFFFFF"/>
+  <ellipse cx="85" cy="70" rx="8" ry="10" fill="#000000"/>
+  <ellipse cx="115" cy="70" rx="8" ry="10" fill="#000000"/>
+  <ellipse cx="100" cy="90" rx="3" ry="5" fill="#000000"/>
+  <ellipse cx="100" cy="110" rx="15" ry="8" fill="#FFFFFF"/>
+  <ellipse cx="100" cy="110" rx="10" ry="5" fill="#000000"/>
+
+  <!-- Orecchie -->
+  <circle cx="75" cy="55" r="12" fill="#000000"/>
+  <circle cx="125" cy="55" r="12" fill="#000000"/>
+  <circle cx="75" cy="55" r="8" fill="#FFFFFF"/>
+  <circle cx="125" cy="55" r="8" fill="#FFFFFF"/>
+</svg>

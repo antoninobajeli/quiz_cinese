@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AllQuestionsSortOption {
@@ -24,8 +25,15 @@ class QuizApp extends StatelessWidget {
       title: 'Quiz Cinese',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepOrange,
+          seedColor: const Color(0xFFFF1493),
           brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFFF1493),
+          brightness: Brightness.dark,
         ),
         useMaterial3: true,
       ),
@@ -52,13 +60,13 @@ class _QuizHomePageState extends State<QuizHomePage> {
   final List<QuizAnswer> _answers = [];
   final Random _random = Random();
   int? _selectedQuestionCount;
+  bool _quizStarted = false;
   int _currentTabIndex = 0;
   AllQuestionsSortOption _allQuestionsSort = AllQuestionsSortOption.ratio;
 
   @override
   void initState() {
     super.initState();
-    _questionsFuture = _loadQuizQuestions();
     _allQuestionsFuture = _loadAllQuestions();
   }
 
@@ -192,6 +200,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
               if (count != null && count > 0) {
                 setState(() {
                   _selectedQuestionCount = count;
+                  _quizStarted = true;
                   _questionsFuture = _loadQuizQuestions();
                 });
                 Navigator.of(context).pop();
@@ -280,7 +289,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
   void _restartQuiz() {
     setState(() {
       _selectedQuestionCount = null;
-      _questionsFuture = _loadQuizQuestions();
+      _quizStarted = false;
       _currentIndex = 0;
       _correctCount = 0;
       _feedbackMessage = null;
@@ -326,20 +335,22 @@ class _QuizHomePageState extends State<QuizHomePage> {
 
   Widget _buildAnswerInput(Question question) {
     if (question.type == QuestionType.multipleChoice) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: question.choices!.map((choice) {
-          return RadioListTile<String>(
-            title: Text(choice),
-            value: choice,
-            groupValue: _selectedChoice,
-            onChanged: (value) {
-              setState(() {
-                _selectedChoice = value;
-              });
-            },
-          );
-        }).toList(),
+      return RadioGroup<String>(
+        groupValue: _selectedChoice,
+        onChanged: (value) {
+          setState(() {
+            _selectedChoice = value;
+          });
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: question.choices!.map((choice) {
+            return RadioListTile<String>(
+              title: Text(choice),
+              value: choice,
+            );
+          }).toList(),
+        ),
       );
     }
 
@@ -355,19 +366,15 @@ class _QuizHomePageState extends State<QuizHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_currentTabIndex == 0 && _selectedQuestionCount == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_selectedQuestionCount == null && _currentTabIndex == 0) {
-          _askForQuestionCount();
-        }
-      });
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quiz Cinese'),
       ),
-      body: _currentTabIndex == 0 ? _buildQuizView() : _buildAllQuestionsView(),
+      body: _currentTabIndex == 0
+          ? _buildQuizView()
+          : _currentTabIndex == 1
+              ? _buildAllQuestionsView()
+              : _buildCurrentQuizQuestionsView(),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentTabIndex,
         onDestinationSelected: (index) {
@@ -384,12 +391,92 @@ class _QuizHomePageState extends State<QuizHomePage> {
             icon: Icon(Icons.list_alt),
             label: 'Statistiche',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.format_list_bulleted),
+            label: 'Quiz attuale',
+          ),
         ],
       ),
     );
   }
 
   Widget _buildQuizView() {
+    if (!_quizStarted) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final logoHeight = constraints.maxHeight / 3;
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  Theme.of(context).colorScheme.surface,
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: 'logo',
+                    child: SvgPicture.asset(
+                      'assets/logo.svg',
+                      height: logoHeight,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Text(
+                    'Sei pronto alla sfida?',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Metti alla prova il tuo cinese e scala la classifica! 🚀',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _askForQuestionCount,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        'INIZIA ORA',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     return FutureBuilder<List<Question>>(
       future: _questionsFuture,
       builder: (context, snapshot) {
@@ -398,7 +485,12 @@ class _QuizHomePageState extends State<QuizHomePage> {
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text('Errore nel caricamento delle domande: ${snapshot.error}'));
+          return Center(
+            child: Text(
+              'Ops! Qualcosa è andato storto 😅',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          );
         }
 
         final questions = snapshot.data!;
@@ -407,68 +499,138 @@ class _QuizHomePageState extends State<QuizHomePage> {
         }
 
         final current = questions[_currentIndex];
+        final progress = (_currentIndex + 1) / questions.length;
 
-        return Padding(
-          padding: const EdgeInsets.all(16),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 12,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                ),
+              ),
+              const SizedBox(height: 12),
               Text(
                 'Domanda ${_currentIndex + 1} di ${questions.length}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                current.question,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              FutureBuilder<QuestionStats>(
-                future: _getQuestionStats(current.id),
-                builder: (context, statsSnapshot) {
-                  if (statsSnapshot.connectionState == ConnectionState.done && statsSnapshot.hasData) {
-                    final stats = statsSnapshot.data!;
-                    final total = stats.correctAnswers + stats.incorrectAnswers;
-                    if (total > 0) {
-                      return Text(
-                        '(${stats.correctAnswers} corrette, ${stats.incorrectAnswers} sbagliate)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      );
-                    }
-                  }
-                  return const SizedBox.shrink();
-                },
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.end,
               ),
               const SizedBox(height: 24),
-              _buildAnswerInput(current),
-              const SizedBox(height: 16),
-              if (_feedbackMessage != null)
-                Text(
-                  _feedbackMessage!,
-                  style: TextStyle(
-                    color: _feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
+              Card(
+                elevation: 0,
+                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   ),
                 ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  _submitAnswer(questions);
-                },
-                child: const Text('Controlla risposta'),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      Text(
+                        current.question,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      FutureBuilder<QuestionStats>(
+                        future: _getQuestionStats(current.id),
+                        builder: (context, statsSnapshot) {
+                          if (statsSnapshot.connectionState == ConnectionState.done && statsSnapshot.hasData) {
+                            final stats = statsSnapshot.data!;
+                            final total = stats.correctAnswers + stats.incorrectAnswers;
+                            if (total > 0) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '🔥 $total risposte totali',
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
+                              );
+                            }
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  _nextQuestion(questions);
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade900),
-                child: const Text('Prossima domanda'),
-              ),
+              const SizedBox(height: 32),
+              _buildAnswerInput(current),
+              const SizedBox(height: 24),
+              if (_feedbackMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _feedbackMessage!.contains('corretta')
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _feedbackMessage!.contains('corretta') ? Icons.check_circle : Icons.error,
+                        color: _feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _feedbackMessage!,
+                          style: TextStyle(
+                            color: _feedbackMessage!.contains('corretta') ? Colors.green.shade700 : Colors.red.shade700,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 32),
+              if (_feedbackMessage == null)
+                ElevatedButton(
+                  onPressed: () => _submitAnswer(questions),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('CONTROLLA', style: TextStyle(fontWeight: FontWeight.bold)),
+                )
+              else
+                ElevatedButton(
+                  onPressed: () => _nextQuestion(questions),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: Text(
+                    _currentIndex + 1 < questions.length ? 'PROSSIMA DOMANDA' : 'VEDI RISULTATO',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
             ],
           ),
         );
@@ -604,6 +766,107 @@ class _QuizHomePageState extends State<QuizHomePage> {
                   ),
                 ),
               ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildCurrentQuizQuestionsView() {
+    if (!_quizStarted) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Avvia il quiz per vedere le domande selezionate per questa sessione.',
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _askForQuestionCount,
+              child: const Text('Avvia quiz'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return FutureBuilder<List<Question>>(
+      future: _questionsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Errore nel caricamento delle domande: ${snapshot.error}'));
+        }
+
+        final questions = snapshot.data!;
+        if (questions.isEmpty) {
+          return const Center(child: Text('Nessuna domanda nel quiz attuale.'));
+        }
+
+        return FutureBuilder<Map<int, QuestionStats>>(
+          future: _loadQuestionStatsMap(),
+          builder: (context, statsSnapshot) {
+            if (statsSnapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (statsSnapshot.hasError) {
+              return Center(child: Text('Errore nel caricamento delle statistiche: ${statsSnapshot.error}'));
+            }
+
+            final stats = statsSnapshot.data!;
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: questions.length,
+              itemBuilder: (context, index) {
+                final question = questions[index];
+                final questionStat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
+                final totalAsked = questionStat.correctAnswers + questionStat.incorrectAnswers;
+                final ratio = totalAsked == 0 ? 0.0 : questionStat.correctAnswers / totalAsked;
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Domanda ${index + 1}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          question.question,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        if (question.type == QuestionType.multipleChoice) ...[
+                          const Text('Scelte:'),
+                          const SizedBox(height: 4),
+                          ...question.choices!.map((choice) => Text('• $choice')).toList(),
+                          const SizedBox(height: 8),
+                        ],
+                        Text('Risposta corretta: ${question.answer}'),
+                        const SizedBox(height: 12),
+                        Text('Statistiche domande:'),
+                        const SizedBox(height: 4),
+                        Text('• Corrette: ${questionStat.correctAnswers}'),
+                        Text('• Sbagliate: ${questionStat.incorrectAnswers}'),
+                        Text('• Rapporto: ${ratio.toStringAsFixed(2)}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
