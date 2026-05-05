@@ -1,66 +1,658 @@
 [
-  {
+    {
     "id": 1,"type": "text",
     "question":"ciao; salve","choices":[] ,
     "answer": "你好"},
-{
+    {
     "id": 2,"type": "text",
     "question":"arrivederci","choices":[] ,
     "answer": "再见"},
-{
+    {
     "id": 3,"type": "text",
     "question":"tu; ti; te","choices":[] ,
     "answer": "你"},
-{
+    {
     "id": 4,"type": "text",
     "question":"buono; bene","choices":[] ,
     "answer": "好"},
-{
+    {
     "id": 5,"type": "text",
     "question":"-","choices":[] ,
     "answer": "吗"},
-{
+    {
     "id": 6,"type": "text",
     "question":"io; mi; me","choices":[] ,
     "answer": "我"},
-{
+    {
     "id": 7,"type": "text",
     "question":"molto","choices":[] ,
     "answer": "很"},
-{
+    {
     "id": 8,"type": "text",
-    "question":"-","choices":[] ,
+    "question":"panno di lana","choices":[] ,
     "answer": "呢"},
-{
+    {
     "id": 9,"type": "text",
     "question":"come?","choices":[] ,
     "answer": "怎么样?"},
-{
+    {
     "id": 10,"type": "text",
     "question":"non c'è male","choices":[] ,
     "answer": "还可以"},
-{
+    {
     "id": 11,"type": "text",
     "question":"tutto; entrambi","choices":[] ,
     "answer": "都"},
-{
+    {
     "id": 12,"type": "text",
     "question":"familiare/familiari","choices":[] ,
     "answer": "家人"},
-{
+    {
     "id": 13,"type": "text",
     "question":"questo/questa","choices":[] ,
     "answer": "这"},
-{
+    {
     "id": 14,"type": "text",
     "question":"signore","choices":[] ,
     "answer": "先生"},
-{
+    {
     "id": 15,"type": "text",
     "question":"piccolo","choices":[] ,
     "answer": "小"},
-{
+    {
     "id": 16,"type": "text",
     "question":"loro; essi","choices":[] ,
-    "answer": "他们"}
+    "answer": "他们"},
+    {
+    "id": 17,"type": "text",
+    "question":"e","choices":[] ,
+    "answer": "和"},
+    {
+    "id": 18,"type": "text",
+    "question":"quest'anno","choices":[] ,
+    "answer": "今年"},
+    {
+    "id": 19,"type": "text",
+    "question":"studente","choices":[] ,
+    "answer": "学生"},
+    {
+    "id": 20,"type": "text",
+    "question":"anche","choices":[] ,
+    "answer": "也"},
+    {
+    "id": 21,"type": "text",
+    "question":"chiamare; chiamarsi","choices":[] ,
+    "answer": "叫"},
+    {
+    "id": 22,"type": "text",
+    "question":"che?; -quale-","choices":[] ,
+    "answer": "什么"},
+    {
+    "id": 23,"type": "text",
+    "question":"nome","choices":[] ,
+    "answer": "名字"},
+    {
+    "id": 24,"type": "text",
+    "question":"cognome; chiamarsi di cognome","choices":[] ,
+    "answer": "姓"},
+    {
+    "id": 25,"type": "text",
+    "question":"ind. possesso","choices":[] ,
+    "answer": "的"},
+    {
+    "id": 26,"type": "text",
+    "question":"esatto","choices":[] ,
+    "answer": "对"},
+    {
+    "id": 27,"type": "text",
+    "question":"quanto?","choices":[] ,
+    "answer": "多"},
+    {
+    "id": 28,"type": "text",
+    "question":"grande","choices":[] ,
+    "answer": "大"},
+    {
+    "id": 29,"type": "text",
+    "question":"anno di età","choices":[] ,
+    "answer": "岁"},
+    {
+    "id": 30,"type": "text",
+    "question":"ella; lei","choices":[] ,
+    "answer": "她"},
+    {
+    "id": 31,"type": "text",
+    "question":"quanti?","choices":[] ,
+    "answer": "几"},
+    {
+    "id": 32,"type": "text",
+    "question":"essere","choices":[] ,
+    "answer": "是"},
+    {
+    "id": 33,"type": "text",
+    "question":"scusi, una domanda","choices":[] ,
+    "answer": "请问"},
+    {
+    "id": 34,"type": "text",
+    "question":"tu (di rispetto, come il nostro)","choices":[] ,
+    "answer": "您"},
+    {
+    "id": 35,"type": "text",
+    "question":"insegnante; maestro","choices":[] ,
+    "answer": "老师"},
+    {
+    "id": 36,"type": "text",
+    "question":"non","choices":[] ,
+    "answer": "不"},
+    {
+    "id": 37,"type": "text",
+    "question":"scusi; scusa; scusate","choices":[] ,
+    "answer": "对不起"},
+    {
+    "id": 38,"type": "text",
+    "question":"non importa","choices":[] ,
+    "answer": "没关系"},
+    {
+    "id": 39,"type": "text",
+    "question":"chi?","choices":[] ,
+    "answer": "谁"},
+    {
+    "id": 40,"type": "text",
+    "question":"egli; lui","choices":[] ,
+    "answer": "他"},
+    {
+    "id": 41,"type": "text",
+    "question":"grazie","choices":[] ,
+    "answer": "谢谢"},
+    {
+    "id": 42,"type": "text",
+    "question":"non c'è di che","choices":[] ,
+    "answer": "不客气"},
+    {
+    "id": 43,"type": "text",
+    "question":"amare","choices":[] ,
+    "answer": "爱"},
+    {
+    "id": 44,"type": "text",
+    "question":"otto","choices":[] ,
+    "answer": "八"},
+    {
+    "id": 45,"type": "text",
+    "question":"papà","choices":[] ,
+    "answer": "爸爸"},
+    {
+    "id": 46,"type": "text",
+    "question":"Pechino","choices":[] ,
+    "answer": "北京"},
+    {
+    "id": 47,"type": "text",
+    "question":"bicchiere","choices":[] ,
+    "answer": "杯子"},
+    {
+    "id": 48,"type": "text",
+    "question":"classificatore per libri","choices":[] ,
+    "answer": "本"},
+    {
+    "id": 49,"type": "text",
+    "question":"piatto / verdura","choices":[] ,
+    "answer": "菜"},
+    {
+    "id": 50,"type": "text",
+    "question":"tè","choices":[] ,
+    "answer": "茶"},
+    {
+    "id": 51,"type": "text",
+    "question":"mangiare","choices":[] ,
+    "answer": "吃"},
+    {
+    "id": 52,"type": "text",
+    "question":"taxi","choices":[] ,
+    "answer": "出租车"},
+    {
+    "id": 53,"type": "text",
+    "question":"telefonare","choices":[] ,
+    "answer": "打电话"},
+    {
+    "id": 54,"type": "text",
+    "question":"ordinare / punto","choices":[] ,
+    "answer": "点"},
+    {
+    "id": 55,"type": "text",
+    "question":"computer","choices":[] ,
+    "answer": "电脑"},
+    {
+    "id": 56,"type": "text",
+    "question":"televisione","choices":[] ,
+    "answer": "电视"},
+    {
+    "id": 57,"type": "text",
+    "question":"film","choices":[] ,
+    "answer": "电影"},
+    {
+    "id": 58,"type": "text",
+    "question":"cosa","choices":[] ,
+    "answer": "东西"},
+    {
+    "id": 59,"type": "text",
+    "question":"leggere","choices":[] ,
+    "answer": "读"},
+    {
+    "id": 60,"type": "text",
+    "question":"quanto / quanti","choices":[] ,
+    "answer": "多少"},
+    {
+    "id": 61,"type": "text",
+    "question":"due","choices":[] ,
+    "answer": "二"},
+    {
+    "id": 62,"type": "text",
+    "question":"figlio","choices":[] ,
+    "answer": "儿子"},
+    {
+    "id": 63,"type": "text",
+    "question":"ristorante","choices":[] ,
+    "answer": "饭馆"},
+    {
+    "id": 64,"type": "text",
+    "question":"aereo","choices":[] ,
+    "answer": "飞机"},
+    {
+    "id": 65,"type": "text",
+    "question":"minuto","choices":[] ,
+    "answer": "分钟"},
+    {
+    "id": 66,"type": "text",
+    "question":"felice","choices":[] ,
+    "answer": "高兴"},
+    {
+    "id": 67,"type": "text",
+    "question":"unità generica","choices":[] ,
+    "answer": "个"},
+    {
+    "id": 68,"type": "text",
+    "question":"lavoro / lavorare","choices":[] ,
+    "answer": "工作"},
+    {
+    "id": 69,"type": "text",
+    "question":"cane","choices":[] ,
+    "answer": "狗"},
+    {
+    "id": 70,"type": "text",
+    "question":"lingua cinese","choices":[] ,
+    "answer": "汉语"},
+    {
+    "id": 71,"type": "text",
+    "question":"bere","choices":[] ,
+    "answer": "喝"},
+    {
+    "id": 72,"type": "text",
+    "question":"dietro","choices":[] ,
+    "answer": "后面"},
+    {
+    "id": 73,"type": "text",
+    "question":"tornare","choices":[] ,
+    "answer": "回"},
+    {
+    "id": 74,"type": "text",
+    "question":"saper fare / potere","choices":[] ,
+    "answer": "会"},
+    {
+    "id": 75,"type": "text",
+    "question":"stazione dei treni","choices":[] ,
+    "answer": "火车站"},
+    {
+    "id": 76,"type": "text",
+    "question":"casa","choices":[] ,
+    "answer": "家"},
+    {
+    "id": 77,"type": "text",
+    "question":"oggi","choices":[] ,
+    "answer": "今天"},
+    {
+    "id": 78,"type": "text",
+    "question":"nove","choices":[] ,
+    "answer": "九"},
+    {
+    "id": 79,"type": "text",
+    "question":"aprire","choices":[] ,
+    "answer": "开"},
+    {
+    "id": 80,"type": "text",
+    "question":"guardare","choices":[] ,
+    "answer": "看"},
+    {
+    "id": 81,"type": "text",
+    "question":"vedere","choices":[] ,
+    "answer": "看见"},
+    {
+    "id": 82,"type": "text",
+    "question":"yuan / pezzo","choices":[] ,
+    "answer": "块"},
+    {
+    "id": 83,"type": "text",
+    "question":"venire","choices":[] ,
+    "answer": "来"},
+    {
+    "id": 84,"type": "text",
+    "question":"particella aspettuale","choices":[] ,
+    "answer": "了"},
+    {
+    "id": 85,"type": "text",
+    "question":"freddo","choices":[] ,
+    "answer": "冷"},
+    {
+    "id": 86,"type": "text",
+    "question":"dentro","choices":[] ,
+    "answer": "里"},
+    {
+    "id": 87,"type": "text",
+    "question":"zero","choices":[] ,
+    "answer": "零"},
+    {
+    "id": 88,"type": "text",
+    "question":"sei","choices":[] ,
+    "answer": "六"},
+    {
+    "id": 89,"type": "text",
+    "question":"comprare","choices":[] ,
+    "answer": "买"},
+    {
+    "id": 90,"type": "text",
+    "question":"mamma","choices":[] ,
+    "answer": "妈妈"},
+    {
+    "id": 91,"type": "text",
+    "question":"gatto","choices":[] ,
+    "answer": "猫"},
+    {
+    "id": 92,"type": "text",
+    "question":"non (passato)","choices":[] ,
+    "answer": "没"},
+    {
+    "id": 93,"type": "text",
+    "question":"riso cotto","choices":[] ,
+    "answer": "米饭"},
+    {
+    "id": 94,"type": "text",
+    "question":"domani","choices":[] ,
+    "answer": "明天"},
+    {
+    "id": 95,"type": "text",
+    "question":"quello / là","choices":[] ,
+    "answer": "那 / 那儿"},
+    {
+    "id": 96,"type": "text",
+    "question":"quale / dove","choices":[] ,
+    "answer": "哪 / 哪儿"},
+    {
+    "id": 97,"type": "text",
+    "question":"potere","choices":[] ,
+    "answer": "能"},
+    {
+    "id": 98,"type": "text",
+    "question":"anno","choices":[] ,
+    "answer": "年"},
+    {
+    "id": 99,"type": "text",
+    "question":"figlia","choices":[] ,
+    "answer": "女儿"},
+    {
+    "id": 100,"type": "text",
+    "question":"amico","choices":[] ,
+    "answer": "朋友"},
+    {
+    "id": 101,"type": "text",
+    "question":"bello","choices":[] ,
+    "answer": "漂亮"},
+    {
+    "id": 102,"type": "text",
+    "question":"mela","choices":[] ,
+    "answer": "苹果"},
+    {
+    "id": 103,"type": "text",
+    "question":"sette","choices":[] ,
+    "answer": "七"},
+    {
+    "id": 104,"type": "text",
+    "question":"soldi","choices":[] ,
+    "answer": "钱"},
+    {
+    "id": 105,"type": "text",
+    "question":"davanti","choices":[] ,
+    "answer": "前面"},
+    {
+    "id": 106,"type": "text",
+    "question":"per favore / invitare","choices":[] ,
+    "answer": "请"},
+    {
+    "id": 107,"type": "text",
+    "question":"andare","choices":[] ,
+    "answer": "去"},
+    {
+    "id": 108,"type": "text",
+    "question":"caldo","choices":[] ,
+    "answer": "热"},
+    {
+    "id": 109,"type": "text",
+    "question":"persona","choices":[] ,
+    "answer": "人"},
+    {
+    "id": 110,"type": "text",
+    "question":"conoscere","choices":[] ,
+    "answer": "认识"},
+    {
+    "id": 111,"type": "text",
+    "question":"giorno","choices":[] ,
+    "answer": "日"},
+    {
+    "id": 112,"type": "text",
+    "question":"tre","choices":[] ,
+    "answer": "三"},
+    {
+    "id": 113,"type": "text",
+    "question":"sopra","choices":[] ,
+    "answer": "上"},
+    {
+    "id": 114,"type": "text",
+    "question":"negozio","choices":[] ,
+    "answer": "商店"},
+    {
+    "id": 115,"type": "text",
+    "question":"mattina","choices":[] ,
+    "answer": "上午"},
+    {
+    "id": 116,"type": "text",
+    "question":"poco","choices":[] ,
+    "answer": "少"},
+    {
+    "id": 117,"type": "text",
+    "question":"chi","choices":[] ,
+    "answer": "谁"},
+    {
+    "id": 118,"type": "text",
+    "question":"dieci","choices":[] ,
+    "answer": "十"},
+    {
+    "id": 119,"type": "text",
+    "question":"momento","choices":[] ,
+    "answer": "时候"},
+    {
+    "id": 120,"type": "text",
+    "question":"libro","choices":[] ,
+    "answer": "书"},
+    {
+    "id": 121,"type": "text",
+    "question":"acqua","choices":[] ,
+    "answer": "水"},
+    {
+    "id": 122,"type": "text",
+    "question":"frutta","choices":[] ,
+    "answer": "水果"},
+    {
+    "id": 123,"type": "text",
+    "question":"dormire","choices":[] ,
+    "answer": "睡觉"},
+    {
+    "id": 124,"type": "text",
+    "question":"parlare","choices":[] ,
+    "answer": "说话"},
+    {
+    "id": 125,"type": "text",
+    "question":"quattro","choices":[] ,
+    "answer": "四"},
+    {
+    "id": 126,"type": "text",
+    "question":"troppo","choices":[] ,
+    "answer": "太"},
+    {
+    "id": 127,"type": "text",
+    "question":"tempo atmosferico","choices":[] ,
+    "answer": "天气"},
+    {
+    "id": 128,"type": "text",
+    "question":"ascoltare","choices":[] ,
+    "answer": "听"},
+    {
+    "id": 129,"type": "text",
+    "question":"compagno di studi","choices":[] ,
+    "answer": "同学"},
+    {
+    "id": 130,"type": "text",
+    "question":"pronto","choices":[] ,
+    "answer": "喂"},
+    {
+    "id": 131,"type": "text",
+    "question":"noi","choices":[] ,
+    "answer": "我们"},
+    {
+    "id": 132,"type": "text",
+    "question":"cinque","choices":[] ,
+    "answer": "五"},
+    {
+    "id": 133,"type": "text",
+    "question":"sotto","choices":[] ,
+    "answer": "下"},
+    {
+    "id": 134,"type": "text",
+    "question":"piovere","choices":[] ,
+    "answer": "下雨"},
+    {
+    "id": 135,"type": "text",
+    "question":"pensare / volere","choices":[] ,
+    "answer": "想"},
+    {
+    "id": 136,"type": "text",
+    "question":"adesso","choices":[] ,
+    "answer": "现在"},
+    {
+    "id": 137,"type": "text",
+    "question":"signorina","choices":[] ,
+    "answer": "小姐"},
+    {
+    "id": 138,"type": "text",
+    "question":"pomeriggio","choices":[] ,
+    "answer": "下午"},
+    {
+    "id": 139,"type": "text",
+    "question":"scrivere","choices":[] ,
+    "answer": "写"},
+    {
+    "id": 140,"type": "text",
+    "question":"alcuni","choices":[] ,
+    "answer": "些"},
+    {
+    "id": 141,"type": "text",
+    "question":"piacere","choices":[] ,
+    "answer": "喜欢"},
+    {
+    "id": 142,"type": "text",
+    "question":"settimana","choices":[] ,
+    "answer": "星期"},
+    {
+    "id": 143,"type": "text",
+    "question":"studiare","choices":[] ,
+    "answer": "学习"},
+    {
+    "id": 144,"type": "text",
+    "question":"scuola","choices":[] ,
+    "answer": "学校"},
+    {
+    "id": 145,"type": "text",
+    "question":"uno","choices":[] ,
+    "answer": "一"},
+    {
+    "id": 146,"type": "text",
+    "question":"vestiti","choices":[] ,
+    "answer": "衣服"},
+    {
+    "id": 147,"type": "text",
+    "question":"medico","choices":[] ,
+    "answer": "医生"},
+    {
+    "id": 148,"type": "text",
+    "question":"ospedale","choices":[] ,
+    "answer": "医院"},
+    {
+    "id": 149,"type": "text",
+    "question":"sedia","choices":[] ,
+    "answer": "椅子"},
+    {
+    "id": 150,"type": "text",
+    "question":"avere","choices":[] ,
+    "answer": "有"},
+    {
+    "id": 151,"type": "text",
+    "question":"mese","choices":[] ,
+    "answer": "月"},
+    {
+    "id": 152,"type": "text",
+    "question":"essere a","choices":[] ,
+    "answer": "在"},
+    {
+    "id": 153,"type": "text",
+    "question":"arrivederci","choices":[] ,
+    "answer": "再见"},
+    {
+    "id": 154,"type": "text",
+    "question":"come","choices":[] ,
+    "answer": "怎么"},
+    {
+    "id": 155,"type": "text",
+    "question":"com’è","choices":[] ,
+    "answer": "怎么样"},
+    {
+    "id": 156,"type": "text",
+    "question":"questo / qui","choices":[] ,
+    "answer": "这 / 这儿"},
+    {
+    "id": 157,"type": "text",
+    "question":"Cina","choices":[] ,
+    "answer": "中国"},
+    {
+    "id": 158,"type": "text",
+    "question":"mezzogiorno","choices":[] ,
+    "answer": "中午"},
+    {
+    "id": 159,"type": "text",
+    "question":"abitare","choices":[] ,
+    "answer": "住"},
+    {
+    "id": 160,"type": "text",
+    "question":"tavolo","choices":[] ,
+    "answer": "桌子"},
+    {
+    "id": 161,"type": "text",
+    "question":"carattere","choices":[] ,
+    "answer": "字"},
+    {
+    "id": 162,"type": "text",
+    "question":"sedersi","choices":[] ,
+    "answer": "坐"},
+    {
+    "id": 163,"type": "text",
+    "question":"fare","choices":[] ,
+    "answer": "做"},
+    {
+    "id": 164,"type": "text",
+    "question":"ieri","choices":[] ,
+    "answer": "昨天"}
 ]

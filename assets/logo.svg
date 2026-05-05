@@ -48,7 +48,7 @@
   </defs>
 
   <!-- Background -->
-  <rect width="1024" height="1024" fill="#fffdff"/>
+  <!--rect width="1024" height="1024" fill="#fffdff"/-->
 
   <!-- Ground shadow -->
   <ellipse cx="512" cy="829" rx="225" ry="38" fill="#ef3f96" opacity="0.16"/>

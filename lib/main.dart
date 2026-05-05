@@ -149,7 +149,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
     while (selected.length < count && remaining.isNotEmpty) {
       final weights = <double>[];
       for (final question in remaining) {
-        final stat = stats.length>0 ? stats[question.id]!:QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
+
+        final stat = ((stats.length>0) && (stats[question.id]!=null))? stats[question.id]!:QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
         final totalAsked = stat.correctAnswers + stat.incorrectAnswers;
         final ratio = totalAsked == 0 ? 0.5 : stat.correctAnswers / totalAsked;
 
@@ -179,12 +180,66 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _askForQuestionCount() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Pronto a iniziare?',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              const Text('Quante domande vuoi affrontare?'),
+              const SizedBox(height: 32),
+              GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.3,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildCountOption(1, 'Riscaldamento'),
+                  _buildCountOption(5, 'Veloce'),
+                  _buildCountOption(10, 'Standard'),
+                  _buildCountOption(20, 'Sfida'),
+                ],
+              ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _askForCustomQuestionCount();
+                },
+                child: const Text('Inserisci numero personalizzato'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Annulla'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _askForCustomQuestionCount() {
     final controller = TextEditingController();
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Numero di domande'),
+        title: const Text('Numero personalizzato'),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
@@ -194,6 +249,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
           ),
         ),
         actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annulla'),
+          ),
           TextButton(
             onPressed: () {
               final count = int.tryParse(controller.text);
@@ -209,6 +268,50 @@ class _QuizHomePageState extends State<QuizHomePage> {
             child: const Text('Inizia'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCountOption(int count, String label) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedQuestionCount = count;
+          _quizStarted = true;
+          _questionsFuture = _loadQuizQuestions();
+        });
+        Navigator.of(context).pop();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
