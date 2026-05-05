@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:confetti/confetti.dart';
 
 import 'models.dart';
 import 'screens/quiz_view.dart';
@@ -62,11 +63,20 @@ class _QuizHomePageState extends State<QuizHomePage> {
   bool _quizStarted = false;
   int _currentTabIndex = 0;
   AllQuestionsSortOption _allQuestionsSort = AllQuestionsSortOption.ratio;
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
     _allQuestionsFuture = _loadAllQuestions();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    _answerController.dispose();
+    super.dispose();
   }
 
   Future<List<Question>> _loadAllQuestions() async {
@@ -337,6 +347,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
       _feedbackMessage = isCorrect ? 'Risposta corretta!' : 'Risposta errata. La risposta giusta è: ${current.answer}';
       if (isCorrect) {
         _correctCount += 1;
+        _confettiController.play();
       }
     });
   }
@@ -712,33 +723,58 @@ class _QuizHomePageState extends State<QuizHomePage> {
       appBar: AppBar(
         title: const Text('Quiz Cinese'),
       ),
-      body: IndexedStack(
-        index: _currentTabIndex,
+      body: Stack(
         children: [
-          QuizView(
-            quizStarted: _quizStarted,
-            questionsFuture: _quizStarted ? _questionsFuture : null,
-            currentIndex: _currentIndex,
-            feedbackMessage: _feedbackMessage,
-            onStartQuiz: _askForQuestionCount,
-            onSubmitAnswer: _submitAnswer,
-            onNextQuestion: _nextQuestion,
-            getQuestionStats: _getQuestionStats,
-            buildAnswerInput: _buildAnswerInput,
+          IndexedStack(
+            index: _currentTabIndex,
+            children: [
+              QuizView(
+                quizStarted: _quizStarted,
+                questionsFuture: _quizStarted ? _questionsFuture : null,
+                currentIndex: _currentIndex,
+                feedbackMessage: _feedbackMessage,
+                onStartQuiz: _askForQuestionCount,
+                onSubmitAnswer: _submitAnswer,
+                onNextQuestion: _nextQuestion,
+                getQuestionStats: _getQuestionStats,
+                buildAnswerInput: _buildAnswerInput,
+              ),
+              StatsView(
+                allQuestionsFuture: _allQuestionsFuture,
+                loadQuestionStatsMap: _loadQuestionStatsMap,
+                currentSort: _allQuestionsSort,
+                onSortChanged: (sort) => setState(() => _allQuestionsSort = sort),
+                buildQuestionStatsCard: _buildQuestionStatsCard,
+              ),
+              CurrentQuizView(
+                quizStarted: _quizStarted,
+                questionsFuture: _quizStarted ? _questionsFuture : null,
+                loadQuestionStatsMap: _loadQuestionStatsMap,
+                onStartQuiz: _askForQuestionCount,
+                buildQuestionStatsCard: _buildQuestionStatsCard,
+              ),
+            ],
           ),
-          StatsView(
-            allQuestionsFuture: _allQuestionsFuture,
-            loadQuestionStatsMap: _loadQuestionStatsMap,
-            currentSort: _allQuestionsSort,
-            onSortChanged: (sort) => setState(() => _allQuestionsSort = sort),
-            buildQuestionStatsCard: _buildQuestionStatsCard,
-          ),
-          CurrentQuizView(
-            quizStarted: _quizStarted,
-            questionsFuture: _quizStarted ? _questionsFuture : null,
-            loadQuestionStatsMap: _loadQuestionStatsMap,
-            onStartQuiz: _askForQuestionCount,
-            buildQuestionStatsCard: _buildQuestionStatsCard,
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Colors.green,
+                Colors.blue,
+                Colors.pink,
+                Colors.orange,
+                Colors.purple,
+                Colors.yellow,
+              ],
+              createParticlePath: (size) {
+                final path = Path();
+                path.addOval(Rect.fromCircle(center: Offset.zero, radius: size.width / 2));
+                return path;
+              },
+            ),
           ),
         ],
       ),
