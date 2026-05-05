@@ -12,6 +12,7 @@ dependencies:
   shared_preferences: ^2.0.0
   flutter_svg: ^2.0.10+1
   confetti: ^0.7.0
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -23,6 +24,8 @@ flutter:
   assets:
     - assets/questions.json
     - assets/logo.svg
+    - assets/libri_cute.svg
+    - assets/success.mp3
 
 flutter_launcher_icons:
   android: "launcher_icon"

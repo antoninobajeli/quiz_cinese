@@ -54,6 +54,8 @@ class Question {
   final QuestionType type;
   final String question;
   final String answer;
+  final String? answerpinyin;
+  final String? answerclassgr;
   final List<String>? choices;
 
   Question({
@@ -61,6 +63,8 @@ class Question {
     required this.type,
     required this.question,
     required this.answer,
+    this.answerpinyin,
+    this.answerclassgr,
     this.choices,
   });
 
@@ -70,6 +74,8 @@ class Question {
       type: json['type'] == 'multiple_choice' ? QuestionType.multipleChoice : QuestionType.text,
       question: json['question'] as String,
       answer: json['answer'] as String,
+      answerpinyin: json['answerpinyin'] as String?,
+      answerclassgr: json['answerclassgr'] as String?,
       choices: json['choices'] != null ? List<String>.from(json['choices'] as List<dynamic>) : null,
     );
   }

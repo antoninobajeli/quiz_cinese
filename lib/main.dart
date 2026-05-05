@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'models.dart';
 import 'screens/quiz_view.dart';
@@ -64,17 +65,20 @@ class _QuizHomePageState extends State<QuizHomePage> {
   int _currentTabIndex = 0;
   AllQuestionsSortOption _allQuestionsSort = AllQuestionsSortOption.ratio;
   late ConfettiController _confettiController;
+  late AudioPlayer _audioPlayer;
 
   @override
   void initState() {
     super.initState();
     _allQuestionsFuture = _loadAllQuestions();
     _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _audioPlayer = AudioPlayer();
   }
 
   @override
   void dispose() {
     _confettiController.dispose();
+    _audioPlayer.dispose();
     _answerController.dispose();
     super.dispose();
   }
@@ -348,6 +352,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
       if (isCorrect) {
         _correctCount += 1;
         _confettiController.play();
+        _audioPlayer.play(AssetSource('success.mp3'));
       }
     });
   }
@@ -657,6 +662,30 @@ class _QuizHomePageState extends State<QuizHomePage> {
                       fontStyle: FontStyle.italic,
                     ),
                   ),
+                  if (question.answerpinyin != null || question.answerclassgr != null) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        if (question.answerpinyin != null && question.answerpinyin!.isNotEmpty)
+                          _buildSmallTag(
+                            text: question.answerpinyin!,
+                            color: colorScheme.secondary,
+                            icon: Icons.record_voice_over_outlined,
+                          ),
+                        if (question.answerpinyin != null &&
+                            question.answerpinyin!.isNotEmpty &&
+                            question.answerclassgr != null &&
+                            question.answerclassgr!.isNotEmpty)
+                          const SizedBox(width: 8),
+                        if (question.answerclassgr != null && question.answerclassgr!.isNotEmpty)
+                          _buildSmallTag(
+                            text: question.answerclassgr!,
+                            color: colorScheme.tertiary,
+                            icon: Icons.label_outline_rounded,
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -711,6 +740,36 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 style: TextStyle(fontSize: 14, color: color, fontWeight: FontWeight.bold),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmallTag({
+    required String text,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 10,
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
