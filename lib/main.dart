@@ -149,7 +149,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     while (selected.length < count && remaining.isNotEmpty) {
       final weights = <double>[];
       for (final question in remaining) {
-        final stat = stats[question.id]!;
+        final stat = stats.length>0 ? stats[question.id]!:QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
         final totalAsked = stat.correctAnswers + stat.incorrectAnswers;
         final ratio = totalAsked == 0 ? 0.5 : stat.correctAnswers / totalAsked;
 
@@ -254,20 +254,127 @@ class _QuizHomePageState extends State<QuizHomePage> {
 
   void _showScoreDialog(int total) {
     _saveScore();
+    final percentage = total > 0 ? (_correctCount / total) : 0.0;
+    String message;
+    String emoji;
+
+    if (percentage == 1.0) {
+      message = 'Incredibile! Sei un vero esperto! 🏆';
+      emoji = '🤩';
+    } else if (percentage >= 0.7) {
+      message = 'Ottimo lavoro! Continua così! 🚀';
+      emoji = '👏';
+    } else if (percentage >= 0.4) {
+      message = 'Niente male, ma puoi migliorare! 💪';
+      emoji = '😉';
+    } else {
+      message = 'Non mollare! La prossima andrà meglio! ✨';
+      emoji = '📚';
+    }
+
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Quiz completato'),
-        content: Text('Hai risposto correttamente a $_correctCount domande su $total.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _restartQuiz();
-            },
-            child: const Text('Ricomincia'),
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+              ],
+            ),
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                emoji,
+                style: const TextStyle(fontSize: 64),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Quiz Completato!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$_correctCount',
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      ' / $total',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'domande corrette',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _restartQuiz();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Ricomincia',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -487,7 +594,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'Ops! Qualcosa è andato storto 😅',
+              'Ops! Qualcosa è andato storto 😅'+snapshot.error.toString(),
               style: Theme.of(context).textTheme.titleLarge,
             ),
           );
@@ -638,6 +745,117 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
+  Widget _buildQuestionStatsCard(Question question, QuestionStats stats) {
+    final totalAsked = stats.correctAnswers + stats.incorrectAnswers;
+    final ratio = totalAsked == 0 ? 0.0 : stats.correctAnswers / totalAsked;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: colorScheme.outlineVariant.withOpacity(0.5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '#${question.id}',
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    question.question,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatBadge(
+                  label: 'Sì',
+                  value: '${stats.correctAnswers}',
+                  icon: Icons.check_circle_rounded,
+                  color: Colors.green,
+                ),
+                _buildStatBadge(
+                  label: 'No',
+                  value: '${stats.incorrectAnswers}',
+                  icon: Icons.cancel_rounded,
+                  color: Colors.red,
+                ),
+                _buildStatBadge(
+                  label: 'Rate',
+                  value: '${(ratio * 100).toInt()}%',
+                  icon: Icons.star_rounded,
+                  color: Colors.orange,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatBadge({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 10, color: color.withOpacity(0.8), fontWeight: FontWeight.bold),
+              ),
+              Text(
+                value,
+                style: TextStyle(fontSize: 14, color: color, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAllQuestionsView() {
     return FutureBuilder<List<Question>>(
       future: _allQuestionsFuture,
@@ -726,42 +944,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                     itemBuilder: (context, index) {
                       final question = sortedQuestions[index];
                       final questionStat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
-                      final totalAsked = questionStat.correctAnswers + questionStat.incorrectAnswers;
-                      final ratio = totalAsked == 0 ? 0.0 : questionStat.correctAnswers / totalAsked;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Domanda #${question.id}',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                question.question,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(height: 8),
-                              if (question.type == QuestionType.multipleChoice) ...[
-                                const Text('Scelte:'),
-                                const SizedBox(height: 4),
-                                ...question.choices!.map((choice) => Text('• $choice')).toList(),
-                                const SizedBox(height: 8),
-                              ],
-                              Text('Risposta corretta: ${question.answer}'),
-                              const SizedBox(height: 12),
-                              Text('Statistiche:'),
-                              const SizedBox(height: 4),
-                              Text('• Corrette: ${questionStat.correctAnswers}'),
-                              Text('• Sbagliate: ${questionStat.incorrectAnswers}'),
-                              Text('• Rapporto: ${ratio.toStringAsFixed(2)}'),
-                            ],
-                          ),
-                        ),
-                      );
+                      return _buildQuestionStatsCard(question, questionStat);
                     },
                   ),
                 ),
@@ -830,42 +1013,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
               itemBuilder: (context, index) {
                 final question = questions[index];
                 final questionStat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
-                final totalAsked = questionStat.correctAnswers + questionStat.incorrectAnswers;
-                final ratio = totalAsked == 0 ? 0.0 : questionStat.correctAnswers / totalAsked;
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Domanda ${index + 1}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          question.question,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        if (question.type == QuestionType.multipleChoice) ...[
-                          const Text('Scelte:'),
-                          const SizedBox(height: 4),
-                          ...question.choices!.map((choice) => Text('• $choice')).toList(),
-                          const SizedBox(height: 8),
-                        ],
-                        Text('Risposta corretta: ${question.answer}'),
-                        const SizedBox(height: 12),
-                        Text('Statistiche domande:'),
-                        const SizedBox(height: 4),
-                        Text('• Corrette: ${questionStat.correctAnswers}'),
-                        Text('• Sbagliate: ${questionStat.incorrectAnswers}'),
-                        Text('• Rapporto: ${ratio.toStringAsFixed(2)}'),
-                      ],
-                    ),
-                  ),
-                );
+                return _buildQuestionStatsCard(question, questionStat);
               },
             );
           },

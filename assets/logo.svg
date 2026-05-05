@@ -1,18 +1,104 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- Sfondo circolare colorato -->
-  <circle cx="100" cy="100" r="95" fill="#FF69B4" stroke="#FF1493" stroke-width="5"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Cute pink panda mascot</title>
+  <desc id="desc">A cute kawaii panda face inside a round pink circular body, with sparkly eyes, blush cheeks and a gentle smile.</desc>
 
-  <!-- Panda stilizzato -->
-  <ellipse cx="100" cy="80" rx="40" ry="35" fill="#FFFFFF"/>
-  <ellipse cx="85" cy="70" rx="8" ry="10" fill="#000000"/>
-  <ellipse cx="115" cy="70" rx="8" ry="10" fill="#000000"/>
-  <ellipse cx="100" cy="90" rx="3" ry="5" fill="#000000"/>
-  <ellipse cx="100" cy="110" rx="15" ry="8" fill="#FFFFFF"/>
-  <ellipse cx="100" cy="110" rx="10" ry="5" fill="#000000"/>
+  <defs>
+    <radialGradient id="bodyGrad" cx="35%" cy="24%" r="72%">
+      <stop offset="0%" stop-color="#ff7dbc"/>
+      <stop offset="45%" stop-color="#ff4fa4"/>
+      <stop offset="100%" stop-color="#ec1f86"/>
+    </radialGradient>
 
-  <!-- Orecchie -->
-  <circle cx="75" cy="55" r="12" fill="#000000"/>
-  <circle cx="125" cy="55" r="12" fill="#000000"/>
-  <circle cx="75" cy="55" r="8" fill="#FFFFFF"/>
-  <circle cx="125" cy="55" r="8" fill="#FFFFFF"/>
+    <radialGradient id="faceGrad" cx="44%" cy="25%" r="75%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="75%" stop-color="#fff9fb"/>
+      <stop offset="100%" stop-color="#f5eef2"/>
+    </radialGradient>
+
+    <radialGradient id="darkGrad" cx="35%" cy="25%" r="70%">
+      <stop offset="0%" stop-color="#4b3552"/>
+      <stop offset="100%" stop-color="#241728"/>
+    </radialGradient>
+
+    <radialGradient id="eyeGrad" cx="35%" cy="25%" r="70%">
+      <stop offset="0%" stop-color="#4b3453"/>
+      <stop offset="65%" stop-color="#2a1b30"/>
+      <stop offset="100%" stop-color="#17101b"/>
+    </radialGradient>
+
+    <radialGradient id="blushGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff9fc3" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#ff8fba" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ff8fba" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#d11a76" flood-opacity="0.22"/>
+    </filter>
+
+    <filter id="earShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#160d19" flood-opacity="0.22"/>
+    </filter>
+
+    <linearGradient id="bodyHighlight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="65%" stop-color="#ffffff" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#fffdff"/>
+
+  <!-- Ground shadow -->
+  <ellipse cx="512" cy="829" rx="225" ry="38" fill="#ef3f96" opacity="0.16"/>
+
+  <!-- Ears -->
+  <g filter="url(#earShadow)">
+    <circle cx="287" cy="318" r="68" fill="url(#darkGrad)"/>
+    <circle cx="287" cy="318" r="43" fill="#fffdfd"/>
+    <circle cx="737" cy="318" r="68" fill="url(#darkGrad)"/>
+    <circle cx="737" cy="318" r="43" fill="#fffdfd"/>
+  </g>
+
+  <!-- Pink body -->
+  <g filter="url(#softShadow)">
+    <circle cx="512" cy="536" r="330" fill="url(#bodyGrad)"/>
+    <path d="M254 350C310 242 432 192 566 207C681 220 766 278 813 368C747 278 649 235 527 230C402 226 304 269 254 350Z" fill="url(#bodyHighlight)" opacity="0.45"/>
+  </g>
+
+  <!-- Face -->
+  <ellipse cx="512" cy="533" rx="220" ry="178" fill="url(#faceGrad)"/>
+
+  <!-- Eye patches / eyes -->
+  <g>
+    <ellipse cx="412" cy="502" rx="54" ry="70" fill="url(#eyeGrad)"/>
+    <ellipse cx="612" cy="502" rx="54" ry="70" fill="url(#eyeGrad)"/>
+
+    <!-- Eye highlights -->
+    <circle cx="396" cy="470" r="22" fill="#ffffff" opacity="0.96"/>
+    <circle cx="430" cy="509" r="11" fill="#ffffff" opacity="0.90"/>
+    <circle cx="408" cy="530" r="7" fill="#ffffff" opacity="0.86"/>
+
+    <circle cx="596" cy="470" r="22" fill="#ffffff" opacity="0.96"/>
+    <circle cx="630" cy="509" r="11" fill="#ffffff" opacity="0.90"/>
+    <circle cx="608" cy="530" r="7" fill="#ffffff" opacity="0.86"/>
+  </g>
+
+  <!-- Blush -->
+  <g>
+    <ellipse cx="348" cy="594" rx="56" ry="39" fill="url(#blushGrad)"/>
+    <ellipse cx="676" cy="594" rx="56" ry="39" fill="url(#blushGrad)"/>
+    <path d="M338 592L324 611" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+    <path d="M363 592L350 611" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.78"/>
+    <path d="M662 592L649 611" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+    <path d="M687 592L674 611" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.78"/>
+  </g>
+
+  <!-- Nose -->
+  <ellipse cx="512" cy="566" rx="22" ry="15" fill="url(#darkGrad)"/>
+  <ellipse cx="504" cy="559" rx="8" ry="4" fill="#ffffff" opacity="0.35"/>
+
+  <!-- Smile -->
+  <path d="M479 604C489 629 535 629 545 604" fill="none" stroke="#241728" stroke-width="13" stroke-linecap="round"/>
 </svg>
