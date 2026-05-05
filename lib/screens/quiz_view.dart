@@ -215,33 +215,43 @@ class QuizView extends StatelessWidget {
                       color: feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
                     ),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Icon(
-                        feedbackMessage!.contains('corretta') ? Icons.check_circle : Icons.error,
-                        color: feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: feedbackMessage!.split(':').first + (feedbackMessage!.contains(':') ? ':' : ''),
-                              ),
-                              if (feedbackMessage!.contains(':'))
-                                TextSpan(
-                                  text: feedbackMessage!.split(':').last,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                            ],
+                      Row(
+                        children: [
+                          Icon(
+                            feedbackMessage!.contains('corretta') ? Icons.check_circle : Icons.error,
+                            color: feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
                           ),
-                          style: TextStyle(
-                            color: feedbackMessage!.contains('corretta') ? Colors.green.shade700 : Colors.red.shade700,
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              feedbackMessage!.contains('corretta') 
+                                ? feedbackMessage!
+                                : 'Risposta errata.',
+                              style: TextStyle(
+                                color: feedbackMessage!.contains('corretta') ? Colors.green.shade700 : Colors.red.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (feedbackMessage!.contains('Risposta errata'))
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Center(
+                            child: Text(
+                              feedbackMessage!.split(':').last.trim(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
