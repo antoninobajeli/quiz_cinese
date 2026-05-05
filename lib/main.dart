@@ -3,14 +3,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum AllQuestionsSortOption {
-  id,
-  ratio,
-  totalAsked,
-}
+import 'models.dart';
+import 'screens/quiz_view.dart';
+import 'screens/stats_view.dart';
+import 'screens/current_quiz_view.dart';
 
 void main() {
   runApp(const QuizApp());
@@ -545,22 +543,20 @@ class _QuizHomePageState extends State<QuizHomePage> {
 
   Widget _buildAnswerInput(Question question) {
     if (question.type == QuestionType.multipleChoice) {
-      return RadioGroup<String>(
-        groupValue: _selectedChoice,
-        onChanged: (value) {
-          setState(() {
-            _selectedChoice = value;
-          });
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: question.choices!.map((choice) {
-            return RadioListTile<String>(
-              title: Text(choice),
-              value: choice,
-            );
-          }).toList(),
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: question.choices!.map((choice) {
+          return RadioListTile<String>(
+            title: Text(choice),
+            value: choice,
+            groupValue: _selectedChoice,
+            onChanged: (value) {
+              setState(() {
+                _selectedChoice = value;
+              });
+            },
+          );
+        }).toList(),
       );
     }
 
@@ -571,280 +567,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
         labelText: 'La tua risposta',
       ),
       keyboardType: TextInputType.text,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quiz Cinese'),
-      ),
-      body: _currentTabIndex == 0
-          ? _buildQuizView()
-          : _currentTabIndex == 1
-              ? _buildAllQuestionsView()
-              : _buildCurrentQuizQuestionsView(),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentTabIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentTabIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.quiz),
-            label: 'Quiz',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.list_alt),
-            label: 'Statistiche',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.format_list_bulleted),
-            label: 'Quiz attuale',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuizView() {
-    if (!_quizStarted) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final logoHeight = constraints.maxHeight / 3;
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                  Theme.of(context).colorScheme.surface,
-                ],
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Hero(
-                    tag: 'logo',
-                    child: SvgPicture.asset(
-                      'assets/logo.svg',
-                      height: logoHeight,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Text(
-                    'Sei pronto alla sfida?',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Metti alla prova il tuo cinese e scala la classifica! 🚀',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _askForQuestionCount,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Text(
-                        'INIZIA ORA',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    }
-
-    return FutureBuilder<List<Question>>(
-      future: _questionsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'Ops! Qualcosa è andato storto 😅'+snapshot.error.toString(),
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          );
-        }
-
-        final questions = snapshot.data!;
-        if (questions.isEmpty) {
-          return const Center(child: Text('Nessuna domanda disponibile.'));
-        }
-
-        final current = questions[_currentIndex];
-        final progress = (_currentIndex + 1) / questions.length;
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 12,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Domanda ${_currentIndex + 1} di ${questions.length}',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.secondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.end,
-              ),
-              const SizedBox(height: 24),
-              Card(
-                elevation: 0,
-                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      Text(
-                        current.question,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      FutureBuilder<QuestionStats>(
-                        future: _getQuestionStats(current.id),
-                        builder: (context, statsSnapshot) {
-                          if (statsSnapshot.connectionState == ConnectionState.done && statsSnapshot.hasData) {
-                            final stats = statsSnapshot.data!;
-                            final total = stats.correctAnswers + stats.incorrectAnswers;
-                            if (total > 0) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  '🔥 $total risposte totali',
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                ),
-                              );
-                            }
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              _buildAnswerInput(current),
-              const SizedBox(height: 24),
-              if (_feedbackMessage != null)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: _feedbackMessage!.contains('corretta')
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: _feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _feedbackMessage!.contains('corretta') ? Icons.check_circle : Icons.error,
-                        color: _feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _feedbackMessage!,
-                          style: TextStyle(
-                            color: _feedbackMessage!.contains('corretta') ? Colors.green.shade700 : Colors.red.shade700,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 32),
-              if (_feedbackMessage == null)
-                ElevatedButton(
-                  onPressed: () => _submitAnswer(questions),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text('CONTROLLA', style: TextStyle(fontWeight: FontWeight.bold)),
-                )
-              else
-                ElevatedButton(
-                  onPressed: () => _nextQuestion(questions),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: Text(
-                    _currentIndex + 1 < questions.length ? 'PROSSIMA DOMANDA' : 'VEDI RISULTATO',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -959,252 +681,64 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-  Widget _buildAllQuestionsView() {
-    return FutureBuilder<List<Question>>(
-      future: _allQuestionsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Errore nel caricamento delle domande: ${snapshot.error}'));
-        }
-
-        final questions = snapshot.data!;
-        return FutureBuilder<Map<int, QuestionStats>>(
-          future: _loadQuestionStatsMap(),
-          builder: (context, statsSnapshot) {
-            if (statsSnapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (statsSnapshot.hasError) {
-              return Center(child: Text('Errore nel caricamento delle statistiche: ${statsSnapshot.error}'));
-            }
-
-            final stats = statsSnapshot.data!;
-            final sortedQuestions = List<Question>.from(questions);
-            sortedQuestions.sort((a, b) {
-              final statsA = stats[a.id] ?? QuestionStats(questionId: a.id, correctAnswers: 0, incorrectAnswers: 0);
-              final statsB = stats[b.id] ?? QuestionStats(questionId: b.id, correctAnswers: 0, incorrectAnswers: 0);
-              final totalA = statsA.correctAnswers + statsA.incorrectAnswers;
-              final totalB = statsB.correctAnswers + statsB.incorrectAnswers;
-              final ratioA = totalA == 0 ? 0.0 : statsA.correctAnswers / totalA;
-              final ratioB = totalB == 0 ? 0.0 : statsB.correctAnswers / totalB;
-              switch (_allQuestionsSort) {
-                case AllQuestionsSortOption.id:
-                  return a.id.compareTo(b.id);
-                case AllQuestionsSortOption.ratio:
-                  return ratioA.compareTo(ratioB);
-                case AllQuestionsSortOption.totalAsked:
-                  return totalB.compareTo(totalA);
-              }
-            });
-
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Ordina per',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      DropdownButton<AllQuestionsSortOption>(
-                        value: _allQuestionsSort,
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _allQuestionsSort = value;
-                            });
-                          }
-                        },
-                        items: const [
-                          DropdownMenuItem(
-                            value: AllQuestionsSortOption.id,
-                            child: Text('ID'),
-                          ),
-                          DropdownMenuItem(
-                            value: AllQuestionsSortOption.ratio,
-                            child: Text('Rapporto'),
-                          ),
-                          DropdownMenuItem(
-                            value: AllQuestionsSortOption.totalAsked,
-                            child: Text('N. risposte'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: sortedQuestions.length,
-                    itemBuilder: (context, index) {
-                      final question = sortedQuestions[index];
-                      final questionStat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
-                      return _buildQuestionStatsCard(question, questionStat);
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Quiz Cinese'),
+      ),
+      body: IndexedStack(
+        index: _currentTabIndex,
+        children: [
+          QuizView(
+            quizStarted: _quizStarted,
+            questionsFuture: _quizStarted ? _questionsFuture : null,
+            currentIndex: _currentIndex,
+            feedbackMessage: _feedbackMessage,
+            onStartQuiz: _askForQuestionCount,
+            onSubmitAnswer: _submitAnswer,
+            onNextQuestion: _nextQuestion,
+            getQuestionStats: _getQuestionStats,
+            buildAnswerInput: _buildAnswerInput,
+          ),
+          StatsView(
+            allQuestionsFuture: _allQuestionsFuture,
+            loadQuestionStatsMap: _loadQuestionStatsMap,
+            currentSort: _allQuestionsSort,
+            onSortChanged: (sort) => setState(() => _allQuestionsSort = sort),
+            buildQuestionStatsCard: _buildQuestionStatsCard,
+          ),
+          CurrentQuizView(
+            quizStarted: _quizStarted,
+            questionsFuture: _quizStarted ? _questionsFuture : null,
+            loadQuestionStatsMap: _loadQuestionStatsMap,
+            onStartQuiz: _askForQuestionCount,
+            buildQuestionStatsCard: _buildQuestionStatsCard,
+          ),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentTabIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentTabIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.quiz),
+            label: 'Quiz',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.list_alt),
+            label: 'Statistiche',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.format_list_bulleted),
+            label: 'Quiz attuale',
+          ),
+        ],
+      ),
     );
   }
-
-  Widget _buildCurrentQuizQuestionsView() {
-    if (!_quizStarted) {
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Avvia il quiz per vedere le domande selezionate per questa sessione.',
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _askForQuestionCount,
-              child: const Text('Avvia quiz'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return FutureBuilder<List<Question>>(
-      future: _questionsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Errore nel caricamento delle domande: ${snapshot.error}'));
-        }
-
-        final questions = snapshot.data!;
-        if (questions.isEmpty) {
-          return const Center(child: Text('Nessuna domanda nel quiz attuale.'));
-        }
-
-        return FutureBuilder<Map<int, QuestionStats>>(
-          future: _loadQuestionStatsMap(),
-          builder: (context, statsSnapshot) {
-            if (statsSnapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (statsSnapshot.hasError) {
-              return Center(child: Text('Errore nel caricamento delle statistiche: ${statsSnapshot.error}'));
-            }
-
-            final stats = statsSnapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: questions.length,
-              itemBuilder: (context, index) {
-                final question = questions[index];
-                final questionStat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
-                return _buildQuestionStatsCard(question, questionStat);
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-enum QuestionType {
-  text,
-  multipleChoice,
-}
-
-class QuizAnswer {
-  final int questionId;
-  final String question;
-  final String userAnswer;
-  final String correctAnswer;
-  final bool isCorrect;
-  final DateTime timestamp;
-
-  QuizAnswer({
-    required this.questionId,
-    required this.question,
-    required this.userAnswer,
-    required this.correctAnswer,
-    required this.isCorrect,
-    required this.timestamp,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'questionId': questionId,
-      'question': question,
-      'userAnswer': userAnswer,
-      'correctAnswer': correctAnswer,
-      'isCorrect': isCorrect,
-      'timestamp': timestamp.toIso8601String(),
-    };
-  }
-
-  factory QuizAnswer.fromJson(Map<String, dynamic> json) {
-    return QuizAnswer(
-      questionId: json['questionId'] as int,
-      question: json['question'] as String,
-      userAnswer: json['userAnswer'] as String,
-      correctAnswer: json['correctAnswer'] as String,
-      isCorrect: json['isCorrect'] as bool,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-    );
-  }
-}
-
-class Question {
-  final int id;
-  final QuestionType type;
-  final String question;
-  final String answer;
-  final List<String>? choices;
-
-  Question({
-    required this.id,
-    required this.type,
-    required this.question,
-    required this.answer,
-    this.choices,
-  });
-
-  factory Question.fromJson(Map<String, dynamic> json) {
-    return Question(
-      id: json['id'] as int,
-      type: json['type'] == 'multiple_choice' ? QuestionType.multipleChoice : QuestionType.text,
-      question: json['question'] as String,
-      answer: json['answer'] as String,
-      choices: json['choices'] != null ? List<String>.from(json['choices'] as List<dynamic>) : null,
-    );
-  }
-}
-
-class QuestionStats {
-  final int questionId;
-  final int correctAnswers;
-  final int incorrectAnswers;
-
-  QuestionStats({
-    required this.questionId,
-    required this.correctAnswers,
-    required this.incorrectAnswers,
-  });
 }
