@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
@@ -394,10 +395,16 @@ class _QuizHomePageState extends State<QuizHomePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                emoji,
-                style: const TextStyle(fontSize: 64),
-              ),
+              if (emoji == '📚')
+                SvgPicture.asset(
+                  'assets/libri_cute.svg',
+                  height: 80,
+                )
+              else
+                Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 64),
+                ),
               const SizedBox(height: 16),
               Text(
                 'Quiz Completato!',
@@ -582,66 +589,84 @@ class _QuizHomePageState extends State<QuizHomePage> {
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(color: colorScheme.outlineVariant.withOpacity(0.5)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onLongPress: () {
+          Clipboard.setData(ClipboardData(text: question.answer));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Risposta "${question.answer}" copiata!'),
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '#${question.id}',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          question.question,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    '#${question.id}',
+                  const SizedBox(height: 4),
+                  Text(
+                    'Risposta: ${question.answer}',
                     style: TextStyle(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    question.question,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatBadge(
-                  label: 'Sì',
-                  value: '${stats.correctAnswers}',
-                  icon: Icons.check_circle_rounded,
-                  color: Colors.green,
-                ),
-                _buildStatBadge(
-                  label: 'No',
-                  value: '${stats.incorrectAnswers}',
-                  icon: Icons.cancel_rounded,
-                  color: Colors.red,
-                ),
-                _buildStatBadge(
-                  label: 'Rate',
-                  value: '${(ratio * 100).toInt()}%',
-                  icon: Icons.star_rounded,
-                  color: Colors.orange,
-                ),
-              ],
+            const SizedBox(width: 12),
+            _buildStatBadge(
+              label: 'Tot.',
+              value: '$totalAsked',
+              icon: Icons.history,
+              color: Colors.blueGrey,
+            ),
+            const SizedBox(width: 8),
+            _buildStatBadge(
+              label: 'Rate',
+              value: '${(ratio * 100).toInt()}%',
+              icon: Icons.star_rounded,
+              color: Colors.orange,
             ),
           ],
         ),
       ),
+    )
     );
   }
 
