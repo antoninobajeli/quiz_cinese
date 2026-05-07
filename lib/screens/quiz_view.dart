@@ -10,6 +10,7 @@ class QuizView extends StatelessWidget {
   final VoidCallback onStartQuiz;
   final Function(List<Question>) onSubmitAnswer;
   final Function(List<Question>) onNextQuestion;
+  final VoidCallback onEndGame;
   final Future<QuestionStats> Function(int) getQuestionStats;
   final Widget Function(Question) buildAnswerInput;
 
@@ -22,6 +23,7 @@ class QuizView extends StatelessWidget {
     required this.onStartQuiz,
     required this.onSubmitAnswer,
     required this.onNextQuestion,
+    required this.onEndGame,
     required this.getQuestionStats,
     required this.buildAnswerInput,
   });
@@ -245,7 +247,7 @@ class QuizView extends StatelessWidget {
                               feedbackMessage!.split(':').last.trim(),
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 36,
                                 fontWeight: FontWeight.bold,
                               ),
                               textAlign: TextAlign.center,
@@ -279,6 +281,21 @@ class QuizView extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: onEndGame,
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                ),
+                child: const Text(
+                  'FINE PARTITA',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
             ],
           ),
         );

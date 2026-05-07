@@ -12,6 +12,7 @@ import 'models.dart';
 import 'screens/quiz_view.dart';
 import 'screens/stats_view.dart';
 import 'screens/current_quiz_view.dart';
+import 'screens/gaming_view.dart';
 
 void main() {
   runApp(const QuizApp());
@@ -62,6 +63,15 @@ class _QuizHomePageState extends State<QuizHomePage> {
   final Random _random = Random();
   int? _selectedQuestionCount;
   bool _quizStarted = false;
+  
+  // State for Gaming Mode
+  bool _gamingStarted = false;
+  int _gamingCurrentIndex = 0;
+  String? _gamingFeedbackMessage;
+  int _gamingCorrectCount = 0;
+  late Future<List<Question>> _gamingQuestionsFuture;
+  final List<QuizAnswer> _gamingAnswers = [];
+
   int _currentTabIndex = 0;
   AllQuestionsSortOption _allQuestionsSort = AllQuestionsSortOption.ratio;
   late ConfettiController _confettiController;
@@ -124,7 +134,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     return stats;
   }
 
-  Future<List<Question>> _loadQuizQuestions() async {
+  Future<List<Question>> _loadQuizQuestions({int? questionCount}) async {
     final allQuestions = await _loadAllQuestions();
     final questionStats = await _loadQuestionStatsMap();
 
@@ -140,8 +150,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
       return ratioA.compareTo(ratioB);
     });
 
-    final questionsToUse = _selectedQuestionCount != null
-        ? _selectWeightedRandomQuestions(sortedQuestions, questionStats, _selectedQuestionCount!)
+    final countToUse = questionCount ?? _selectedQuestionCount;
+    final questionsToUse = countToUse != null
+        ? _selectWeightedRandomQuestions(sortedQuestions, questionStats, countToUse)
         : sortedQuestions;
 
     return questionsToUse;
@@ -273,7 +284,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 setState(() {
                   _selectedQuestionCount = count;
                   _quizStarted = true;
-                  _questionsFuture = _loadQuizQuestions();
+                  _questionsFuture = _loadQuizQuestions(questionCount: count);
                 });
                 Navigator.of(context).pop();
               }
@@ -291,7 +302,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
         setState(() {
           _selectedQuestionCount = count;
           _quizStarted = true;
-          _questionsFuture = _loadQuizQuestions();
+          _questionsFuture = _loadQuizQuestions(questionCount: count);
         });
         Navigator.of(context).pop();
       },
@@ -348,12 +359,198 @@ class _QuizHomePageState extends State<QuizHomePage> {
     ));
     
     setState(() {
-      _feedbackMessage = isCorrect ? 'Risposta corretta!' : 'Risposta errata. La risposta giusta è: ${current.answer}';
+      _feedbackMessage = isCorrect ? 'Risposta corretta!' : 'Risposta errata. La risposta giusta è: ${current.answer} --  ${current.answerpinyin}';
       if (isCorrect) {
         _correctCount += 1;
         _confettiController.play();
         _audioPlayer.play(AssetSource('success.mp3'));
       }
+    });
+  }
+
+  // Gaming Mode Logic
+  void _askForGamingQuestionCount() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Pronto a Giocare?',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              const Text('Quante sfide vuoi affrontare?'),
+              const SizedBox(height: 32),
+              GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.3,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildGamingCountOption(5, 'Sprint'),
+                  _buildGamingCountOption(10, 'Maratona'),
+                  _buildGamingCountOption(20, 'Elite'),
+                  _buildGamingCountOption(50, 'Leggenda'),
+                ],
+              ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Annulla'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGamingCountOption(int count, String label) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _gamingStarted = true;
+          _gamingQuestionsFuture = _loadQuizQuestions(questionCount: count);
+        });
+        Navigator.of(context).pop();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onTertiaryContainer,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _submitGamingAnswer(List<Question> questions, String selectedChar) {
+    final current = questions[_gamingCurrentIndex];
+    // In questa modalità, l'input è corretto se coincide con il carattere visualizzato (che è parte della risposta)
+    // È più un esercizio di riconoscimento/scrittura
+    final isCorrect = true; // In questa modalità l'onChanged del GamingView valida già l'input
+    
+    _gamingAnswers.add(QuizAnswer(
+      questionId: current.id,
+      question: current.question,
+      userAnswer: selectedChar,
+      correctAnswer: current.answer,
+      isCorrect: isCorrect,
+      timestamp: DateTime.now(),
+    ));
+    
+    setState(() {
+      _gamingFeedbackMessage = 'Ottimo! "$selectedChar" è corretto! ✨';
+      _gamingCorrectCount += 1;
+      _confettiController.play();
+      _audioPlayer.play(AssetSource('success.mp3'));
+    });
+  }
+
+  void _nextGamingQuestion(List<Question> questions) {
+    if (_gamingCurrentIndex + 1 < questions.length) {
+      setState(() {
+        _gamingCurrentIndex += 1;
+        _gamingFeedbackMessage = null;
+      });
+    } else {
+      _showGamingScoreDialog(questions.length);
+    }
+  }
+
+  void _showGamingScoreDialog(int total) {
+    // Salvataggio opzionale per statistiche separate se necessario
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🎮', style: TextStyle(fontSize: 64)),
+              const SizedBox(height: 16),
+              Text(
+                'Sfida Completata!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Hai completato $total sfide di caratteri!',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _restartGaming();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    foregroundColor: Theme.of(context).colorScheme.onTertiary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Ricomincia', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _restartGaming() {
+    setState(() {
+      _gamingStarted = false;
+      _gamingCurrentIndex = 0;
+      _gamingCorrectCount = 0;
+      _gamingFeedbackMessage = null;
+      _gamingAnswers.clear();
     });
   }
 
@@ -517,6 +714,15 @@ class _QuizHomePageState extends State<QuizHomePage> {
     await prefs.setStringList('quiz_sessions', sessions);
   }
 
+  void _endQuiz() {
+    _saveScore();
+    _showScoreDialog(_currentIndex + 1); // Mostra risultati fino alla domanda corrente
+  }
+
+  void _endGaming() {
+    _showGamingScoreDialog(_gamingCurrentIndex + 1); // Mostra risultati fino alla sfida corrente
+  }
+
   void _restartQuiz() {
     setState(() {
       _selectedQuestionCount = null;
@@ -654,10 +860,18 @@ class _QuizHomePageState extends State<QuizHomePage> {
                     ],
                   ),
                   const SizedBox(height: 4),
+                  (question.answerpinyin != null && question.answerpinyin!.isNotEmpty)?
                   Text(
-                    'Risposta: ${question.answer}',
+                    '${question.answer} ${question.answerpinyin}',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 26,
+                      color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ):Text(
+                    'R: ${question.answer}',
+                    style: TextStyle(
+                      fontSize: 26,
                       color: colorScheme.onSurfaceVariant.withOpacity(0.8),
                       fontStyle: FontStyle.italic,
                     ),
@@ -666,7 +880,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        if (question.answerpinyin != null && question.answerpinyin!.isNotEmpty)
+                        /*if (question.answerpinyin != null && question.answerpinyin!.isNotEmpty)
                           _buildSmallTag(
                             text: question.answerpinyin!,
                             color: colorScheme.secondary,
@@ -676,7 +890,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                             question.answerpinyin!.isNotEmpty &&
                             question.answerclassgr != null &&
                             question.answerclassgr!.isNotEmpty)
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 8),*/
                         if (question.answerclassgr != null && question.answerclassgr!.isNotEmpty)
                           _buildSmallTag(
                             text: question.answerclassgr!,
@@ -689,20 +903,22 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            _buildStatBadge(
-              label: 'Tot.',
-              value: '$totalAsked',
-              icon: Icons.history,
-              color: Colors.blueGrey,
-            ),
-            const SizedBox(width: 8),
-            _buildStatBadge(
-              label: 'Rate',
-              value: '${(ratio * 100).toInt()}%',
-              icon: Icons.star_rounded,
-              color: Colors.orange,
-            ),
+            Column(children: [
+              _buildStatBadge(
+                label: 'Tot.',
+                value: '$totalAsked',
+                icon: Icons.history,
+                color: Colors.blueGrey,
+              ),
+              _buildStatBadge(
+                label: 'Rate',
+                value: '${(ratio * 100).toInt()}%',
+                icon: Icons.star_rounded,
+                color: Colors.orange,
+              ),
+            ]
+            )
+
           ],
         ),
       ),
@@ -731,10 +947,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              /*Text(
                 label,
                 style: TextStyle(fontSize: 10, color: color.withOpacity(0.8), fontWeight: FontWeight.bold),
-              ),
+              ),*/
               Text(
                 value,
                 style: TextStyle(fontSize: 14, color: color, fontWeight: FontWeight.bold),
@@ -766,7 +982,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
           Text(
             text,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 18,
               color: color,
               fontWeight: FontWeight.bold,
             ),
@@ -795,8 +1011,19 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 onStartQuiz: _askForQuestionCount,
                 onSubmitAnswer: _submitAnswer,
                 onNextQuestion: _nextQuestion,
+                onEndGame: _endQuiz,
                 getQuestionStats: _getQuestionStats,
                 buildAnswerInput: _buildAnswerInput,
+              ),
+              GamingView(
+                gamingStarted: _gamingStarted,
+                questionsFuture: _gamingStarted ? _gamingQuestionsFuture : null,
+                currentIndex: _gamingCurrentIndex,
+                feedbackMessage: _gamingFeedbackMessage,
+                onStartGaming: _askForGamingQuestionCount,
+                onSubmitAnswer: _submitGamingAnswer,
+                onNextQuestion: _nextGamingQuestion,
+                onEndGame: _endGaming,
               ),
               StatsView(
                 allQuestionsFuture: _allQuestionsFuture,
@@ -848,6 +1075,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
           NavigationDestination(
             icon: Icon(Icons.quiz),
             label: 'Quiz',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.sports_esports),
+            label: 'Gaming',
           ),
           NavigationDestination(
             icon: Icon(Icons.list_alt),
