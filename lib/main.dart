@@ -11,8 +11,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'models.dart';
 import 'screens/quiz_view.dart';
 import 'screens/stats_view.dart';
-import 'screens/current_quiz_view.dart';
 import 'screens/gaming_view.dart';
+import 'services/quiz_controller.dart';
 
 void main() {
   runApp(const QuizApp());
@@ -52,26 +52,10 @@ class QuizHomePage extends StatefulWidget {
 }
 
 class _QuizHomePageState extends State<QuizHomePage> {
-  late Future<List<Question>> _questionsFuture;
-  late Future<List<Question>> _allQuestionsFuture;
+  late QuizController _controller;
   final _answerController = TextEditingController();
   String? _selectedChoice;
-  int _currentIndex = 0;
-  String? _feedbackMessage;
-  int _correctCount = 0;
-  final List<QuizAnswer> _answers = [];
-  final Random _random = Random();
   int? _selectedQuestionCount;
-  bool _quizStarted = false;
-  
-  // State for Gaming Mode
-  bool _gamingStarted = false;
-  int _gamingCurrentIndex = 0;
-  String? _gamingFeedbackMessage;
-  int _gamingCorrectCount = 0;
-  late Future<List<Question>> _gamingQuestionsFuture;
-  final List<QuizAnswer> _gamingAnswers = [];
-
   int _currentTabIndex = 0;
   AllQuestionsSortOption _allQuestionsSort = AllQuestionsSortOption.ratio;
   late ConfettiController _confettiController;
@@ -80,128 +64,31 @@ class _QuizHomePageState extends State<QuizHomePage> {
   @override
   void initState() {
     super.initState();
-    _allQuestionsFuture = _loadAllQuestions();
+    _controller = QuizController();
+    _controller.addListener(_onControllerChanged);
     _confettiController = ConfettiController(duration: const Duration(seconds: 1));
     _audioPlayer = AudioPlayer();
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
     _confettiController.dispose();
     _audioPlayer.dispose();
     _answerController.dispose();
     super.dispose();
   }
 
-  Future<List<Question>> _loadAllQuestions() async {
-    final jsonString = await rootBundle.loadString('assets/questions.json');
-    final decoded = jsonDecode(jsonString) as List<dynamic>;
-    return decoded.map((item) => Question.fromJson(item)).toList();
+  void _onControllerChanged() {
+    setState(() {});
   }
 
   Future<Map<int, QuestionStats>> _loadQuestionStatsMap() async {
-    final prefs = await SharedPreferences.getInstance();
-    final sessions = prefs.getStringList('quiz_sessions') ?? [];
-    final stats = <int, QuestionStats>{};
-
-    for (final sessionJson in sessions) {
-      try {
-        final session = jsonDecode(sessionJson) as Map<String, dynamic>;
-        final answers = session['answers'] as List<dynamic>? ?? [];
-
-        for (final answerJson in answers) {
-          final answer = QuizAnswer.fromJson(answerJson as Map<String, dynamic>);
-          final existing = stats[answer.questionId];
-          if (existing == null) {
-            stats[answer.questionId] = QuestionStats(
-              questionId: answer.questionId,
-              correctAnswers: answer.isCorrect ? 1 : 0,
-              incorrectAnswers: answer.isCorrect ? 0 : 1,
-            );
-          } else {
-            stats[answer.questionId] = QuestionStats(
-              questionId: existing.questionId,
-              correctAnswers: existing.correctAnswers + (answer.isCorrect ? 1 : 0),
-              incorrectAnswers: existing.incorrectAnswers + (answer.isCorrect ? 0 : 1),
-            );
-          }
-        }
-      } catch (_) {
-        // Ignora sessioni malformate
-      }
-    }
-
-    return stats;
+    return _controller.loadStats();
   }
 
-  Future<List<Question>> _loadQuizQuestions({int? questionCount}) async {
-    final allQuestions = await _loadAllQuestions();
-    final questionStats = await _loadQuestionStatsMap();
 
-    final sortedQuestions = List<Question>.from(allQuestions);
-    sortedQuestions.sort((a, b) {
-      final statsA = questionStats[a.id] ?? QuestionStats(questionId: a.id, correctAnswers: 0, incorrectAnswers: 0);
-      final statsB = questionStats[b.id] ?? QuestionStats(questionId: b.id, correctAnswers: 0, incorrectAnswers: 0);
-
-      final totalA = statsA.correctAnswers + statsA.incorrectAnswers;
-      final totalB = statsB.correctAnswers + statsB.incorrectAnswers;
-      final ratioA = totalA == 0 ? 0.5 : statsA.correctAnswers / totalA;
-      final ratioB = totalB == 0 ? 0.5 : statsB.correctAnswers / totalB;
-      return ratioA.compareTo(ratioB);
-    });
-
-    final countToUse = questionCount ?? _selectedQuestionCount;
-    final questionsToUse = countToUse != null
-        ? _selectWeightedRandomQuestions(sortedQuestions, questionStats, countToUse)
-        : sortedQuestions;
-
-    return questionsToUse;
-  }
-
-  List<Question> _selectWeightedRandomQuestions(
-    List<Question> sortedQuestions,
-    Map<int, QuestionStats> stats,
-    int count,
-  ) {
-    if (count >= sortedQuestions.length) {
-      return List<Question>.from(sortedQuestions);
-    }
-
-    final remaining = List<Question>.from(sortedQuestions);
-    final selected = <Question>[];
-
-    while (selected.length < count && remaining.isNotEmpty) {
-      final weights = <double>[];
-      for (final question in remaining) {
-
-        final stat = ((stats.length>0) && (stats[question.id]!=null))? stats[question.id]!:QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
-        final totalAsked = stat.correctAnswers + stat.incorrectAnswers;
-        final ratio = totalAsked == 0 ? 0.5 : stat.correctAnswers / totalAsked;
-
-        final priorityWeight = 1.0 - ratio;
-        final askWeight = 1.0 / (1 + totalAsked);
-        final combinedWeight = priorityWeight * 0.7 + askWeight * 0.3 + 0.01;
-        weights.add(combinedWeight);
-      }
-
-      final totalWeight = weights.fold(0.0, (sum, w) => sum + w);
-      final choice = _random.nextDouble() * totalWeight;
-      double cumulative = 0.0;
-      int chosenIndex = 0;
-
-      for (var i = 0; i < remaining.length; i++) {
-        cumulative += weights[i];
-        if (choice <= cumulative) {
-          chosenIndex = i;
-          break;
-        }
-      }
-
-      selected.add(remaining.removeAt(chosenIndex));
-    }
-
-    return selected;
-  }
 
   void _askForQuestionCount() {
     showDialog<void>(
@@ -283,8 +170,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
               if (count != null && count > 0) {
                 setState(() {
                   _selectedQuestionCount = count;
-                  _quizStarted = true;
-                  _questionsFuture = _loadQuizQuestions(questionCount: count);
+                  _controller.startQuiz(count);
                 });
                 Navigator.of(context).pop();
               }
@@ -301,8 +187,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
       onTap: () {
         setState(() {
           _selectedQuestionCount = count;
-          _quizStarted = true;
-          _questionsFuture = _loadQuizQuestions(questionCount: count);
+          _controller.startQuiz(count);
         });
         Navigator.of(context).pop();
       },
@@ -341,27 +226,15 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _submitAnswer(List<Question> questions) {
-    final current = questions[_currentIndex];
+    final current = questions[_controller.quizSession.currentIndex];
     final answer = current.type == QuestionType.text
         ? _answerController.text.trim()
         : _selectedChoice ?? '';
 
-    final isCorrect = answer.toLowerCase() == current.answer.toLowerCase();
-    
-    // Salva la risposta
-    _answers.add(QuizAnswer(
-      questionId: current.id,
-      question: current.question,
-      userAnswer: answer,
-      correctAnswer: current.answer,
-      isCorrect: isCorrect,
-      timestamp: DateTime.now(),
-    ));
-    
+    _controller.submitQuizAnswer(answer);
+
     setState(() {
-      _feedbackMessage = isCorrect ? 'Risposta corretta!' : 'Risposta errata. La risposta giusta è: ${current.answer} --  ${current.answerpinyin}';
-      if (isCorrect) {
-        _correctCount += 1;
+      if (_controller.quizSession.feedbackMessage!.contains('corretta')) {
         _confettiController.play();
         _audioPlayer.play(AssetSource('success.mp3'));
       }
@@ -420,8 +293,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     return InkWell(
       onTap: () {
         setState(() {
-          _gamingStarted = true;
-          _gamingQuestionsFuture = _loadQuizQuestions(questionCount: count);
+          _controller.startGaming(count);
         });
         Navigator.of(context).pop();
       },
@@ -460,35 +332,17 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _submitGamingAnswer(List<Question> questions, String selectedChar) {
-    final current = questions[_gamingCurrentIndex];
-    // In questa modalità, l'input è corretto se coincide con il carattere visualizzato (che è parte della risposta)
-    // È più un esercizio di riconoscimento/scrittura
-    final isCorrect = true; // In questa modalità l'onChanged del GamingView valida già l'input
-    
-    _gamingAnswers.add(QuizAnswer(
-      questionId: current.id,
-      question: current.question,
-      userAnswer: selectedChar,
-      correctAnswer: current.answer,
-      isCorrect: isCorrect,
-      timestamp: DateTime.now(),
-    ));
-    
+    _controller.submitGamingAnswer(selectedChar);
+
     setState(() {
-      _gamingFeedbackMessage = 'Ottimo! "$selectedChar" è corretto! ✨';
-      _gamingCorrectCount += 1;
       _confettiController.play();
       _audioPlayer.play(AssetSource('success.mp3'));
     });
   }
 
   void _nextGamingQuestion(List<Question> questions) {
-    if (_gamingCurrentIndex + 1 < questions.length) {
-      setState(() {
-        _gamingCurrentIndex += 1;
-        _gamingFeedbackMessage = null;
-      });
-    } else {
+    _controller.nextGamingQuestion();
+    if (_controller.gamingSession.isCompleted) {
       _showGamingScoreDialog(questions.length);
     }
   }
@@ -545,31 +399,23 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _restartGaming() {
-    setState(() {
-      _gamingStarted = false;
-      _gamingCurrentIndex = 0;
-      _gamingCorrectCount = 0;
-      _gamingFeedbackMessage = null;
-      _gamingAnswers.clear();
-    });
+    _controller.restartGaming();
   }
 
   void _nextQuestion(List<Question> questions) {
-    if (_currentIndex + 1 < questions.length) {
+    _controller.nextQuizQuestion();
+    if (_controller.quizSession.isCompleted) {
+      _showScoreDialog(questions.length);
+    } else {
       setState(() {
-        _currentIndex += 1;
         _answerController.clear();
         _selectedChoice = null;
-        _feedbackMessage = null;
       });
-    } else {
-      _showScoreDialog(questions.length);
     }
   }
 
   void _showScoreDialog(int total) {
-    _saveScore();
-    final percentage = total > 0 ? (_correctCount / total) : 0.0;
+    final percentage = total > 0 ? (_controller.quizSession.correctCount / total) : 0.0;
     String message;
     String emoji;
 
@@ -645,7 +491,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '$_correctCount',
+                      '${_controller.quizSession.correctCount}',
                       style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
@@ -700,74 +546,27 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-  Future<void> _saveScore() async {
-    final prefs = await SharedPreferences.getInstance();
-    final quizSession = {
-      'timestamp': DateTime.now().toIso8601String(),
-      'correctCount': _correctCount,
-      'totalQuestions': _answers.length,
-      'answers': _answers.map((a) => a.toJson()).toList(),
-    };
-    
-    final sessions = prefs.getStringList('quiz_sessions') ?? [];
-    sessions.add(jsonEncode(quizSession));
-    await prefs.setStringList('quiz_sessions', sessions);
-  }
-
   void _endQuiz() {
-    _saveScore();
-    _showScoreDialog(_currentIndex + 1); // Mostra risultati fino alla domanda corrente
+    _controller.endQuiz();
+    _showScoreDialog(_controller.quizSession.currentIndex + 1);
   }
 
   void _endGaming() {
-    _showGamingScoreDialog(_gamingCurrentIndex + 1); // Mostra risultati fino alla sfida corrente
+    _controller.endGaming();
+    _showGamingScoreDialog(_controller.gamingSession.currentIndex + 1);
   }
 
   void _restartQuiz() {
     setState(() {
       _selectedQuestionCount = null;
-      _quizStarted = false;
-      _currentIndex = 0;
-      _correctCount = 0;
-      _feedbackMessage = null;
+      _controller.restartQuiz();
       _answerController.clear();
       _selectedChoice = null;
-      _answers.clear();
     });
   }
 
   Future<QuestionStats> _getQuestionStats(int questionId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final sessions = prefs.getStringList('quiz_sessions') ?? [];
-    
-    int correct = 0;
-    int incorrect = 0;
-    
-    for (final sessionJson in sessions) {
-      try {
-        final session = jsonDecode(sessionJson) as Map<String, dynamic>;
-        final answers = session['answers'] as List<dynamic>? ?? [];
-        
-        for (final answerJson in answers) {
-          final answer = QuizAnswer.fromJson(answerJson as Map<String, dynamic>);
-          if (answer.questionId == questionId) {
-            if (answer.isCorrect) {
-              correct++;
-            } else {
-              incorrect++;
-            }
-          }
-        }
-      } catch (e) {
-        // Ignora sessioni malformate
-      }
-    }
-    
-    return QuestionStats(
-      questionId: questionId,
-      correctAnswers: correct,
-      incorrectAnswers: incorrect,
-    );
+    return _controller.getQuestionStats(questionId);
   }
 
   Widget _buildAnswerInput(Question question) {
@@ -1004,39 +803,34 @@ class _QuizHomePageState extends State<QuizHomePage> {
             index: _currentTabIndex,
             children: [
               QuizView(
-                quizStarted: _quizStarted,
-                questionsFuture: _quizStarted ? _questionsFuture : null,
-                currentIndex: _currentIndex,
-                feedbackMessage: _feedbackMessage,
+                quizStarted: _controller.quizSession.isStarted,
+                questionsFuture: _controller.quizQuestionsFuture,
+                currentIndex: _controller.quizSession.currentIndex,
+                feedbackMessage: _controller.quizSession.feedbackMessage,
                 onStartQuiz: _askForQuestionCount,
                 onSubmitAnswer: _submitAnswer,
                 onNextQuestion: _nextQuestion,
                 onEndGame: _endQuiz,
                 getQuestionStats: _getQuestionStats,
                 buildAnswerInput: _buildAnswerInput,
+                loadQuestionStatsMap: _loadQuestionStatsMap,
+                buildQuestionStatsCard: _buildQuestionStatsCard,
               ),
               GamingView(
-                gamingStarted: _gamingStarted,
-                questionsFuture: _gamingStarted ? _gamingQuestionsFuture : null,
-                currentIndex: _gamingCurrentIndex,
-                feedbackMessage: _gamingFeedbackMessage,
+                gamingStarted: _controller.gamingSession.isStarted,
+                questionsFuture: _controller.gamingQuestionsFuture,
+                currentIndex: _controller.gamingSession.currentIndex,
+                feedbackMessage: _controller.gamingSession.feedbackMessage,
                 onStartGaming: _askForGamingQuestionCount,
                 onSubmitAnswer: _submitGamingAnswer,
                 onNextQuestion: _nextGamingQuestion,
                 onEndGame: _endGaming,
               ),
               StatsView(
-                allQuestionsFuture: _allQuestionsFuture,
+                allQuestionsFuture: _controller.allQuestionsFuture,
                 loadQuestionStatsMap: _loadQuestionStatsMap,
                 currentSort: _allQuestionsSort,
                 onSortChanged: (sort) => setState(() => _allQuestionsSort = sort),
-                buildQuestionStatsCard: _buildQuestionStatsCard,
-              ),
-              CurrentQuizView(
-                quizStarted: _quizStarted,
-                questionsFuture: _quizStarted ? _questionsFuture : null,
-                loadQuestionStatsMap: _loadQuestionStatsMap,
-                onStartQuiz: _askForQuestionCount,
                 buildQuestionStatsCard: _buildQuestionStatsCard,
               ),
             ],
@@ -1083,10 +877,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
           NavigationDestination(
             icon: Icon(Icons.list_alt),
             label: 'Statistiche',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.format_list_bulleted),
-            label: 'Quiz attuale',
           ),
         ],
       ),

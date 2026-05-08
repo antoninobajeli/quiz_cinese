@@ -54,6 +54,8 @@ class StatsView extends StatelessWidget {
               switch (currentSort) {
                 case AllQuestionsSortOption.id:
                   return a.id.compareTo(b.id);
+                case AllQuestionsSortOption.question:
+                  return a.question.toLowerCase().compareTo(b.question.toLowerCase());
                 case AllQuestionsSortOption.ratio:
                   return ratioA.compareTo(ratioB);
                 case AllQuestionsSortOption.totalAsked:
@@ -83,6 +85,10 @@ class StatsView extends StatelessWidget {
                           DropdownMenuItem(
                             value: AllQuestionsSortOption.id,
                             child: Text('ID'),
+                          ),
+                          DropdownMenuItem(
+                            value: AllQuestionsSortOption.question,
+                            child: Text('Domanda'),
                           ),
                           DropdownMenuItem(
                             value: AllQuestionsSortOption.ratio,
