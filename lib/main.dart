@@ -225,7 +225,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-  void _submitAnswer(List<Question> questions) {
+  void _submitQuizAnswer(List<Question> questions) {
     final current = questions[_controller.quizSession.currentIndex];
     final answer = current.type == QuestionType.text
         ? _answerController.text.trim()
@@ -332,12 +332,23 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _submitGamingAnswer(List<Question> questions, String selectedChar) {
+
+    final current = questions[_controller.quizSession.currentIndex];
+    final answer = current.type == QuestionType.text
+        ? _answerController.text.trim()
+        : _selectedChoice ?? '';
+
     _controller.submitGamingAnswer(selectedChar);
 
     setState(() {
-      _confettiController.play();
-      _audioPlayer.play(AssetSource('success.mp3'));
+      if (_controller.gamingSession.feedbackMessage!.contains('Ottimo')) {
+        _confettiController.play();
+        _audioPlayer.play(AssetSource('success.mp3'));
+      }
     });
+
+
+
   }
 
   void _nextGamingQuestion(List<Question> questions) {
@@ -808,7 +819,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 currentIndex: _controller.quizSession.currentIndex,
                 feedbackMessage: _controller.quizSession.feedbackMessage,
                 onStartQuiz: _askForQuestionCount,
-                onSubmitAnswer: _submitAnswer,
+                onSubmitAnswer: _submitQuizAnswer,
                 onNextQuestion: _nextQuestion,
                 onEndGame: _endQuiz,
                 getQuestionStats: _getQuestionStats,

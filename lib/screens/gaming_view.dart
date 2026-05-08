@@ -210,10 +210,10 @@ class _GamingViewState extends State<GamingView> {
                             ),
                           ),
                           onChanged: (val) {
-                            if (val.trim() == _targetChar) {
-                              widget.onSubmitAnswer(questions, _targetChar!);
+
+                              widget.onSubmitAnswer(questions, val.trim()!);
                               _controller.clear();
-                            }
+
                           },
                         ),
                         const SizedBox(height: 24),

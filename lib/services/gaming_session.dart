@@ -20,7 +20,9 @@ class GamingSession {
   void submitAnswer(String selectedChar) {
     final current = questions[currentIndex];
     // In gaming mode, input is always considered correct as validation happens in UI
-    final isCorrect = true;
+
+    final isCorrect = current.answer.toLowerCase().contains(selectedChar.toLowerCase());
+
 
     answers.add(QuizAnswer(
       questionId: current.id,
@@ -31,8 +33,16 @@ class GamingSession {
       timestamp: DateTime.now(),
     ));
 
-    feedbackMessage = 'Ottimo! "$selectedChar" è corretto! ✨';
-    correctCount += 1;
+
+    feedbackMessage = isCorrect
+        ? 'Ottimo! "$selectedChar" è corretto! ✨'
+        : 'Risposta errata. Il carattere "$selectedChar" non è corretto';
+
+    if (isCorrect) {
+      correctCount += 1;
+    }
+
+
   }
 
   bool nextQuestion() {
