@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models.dart';
 
@@ -373,7 +374,21 @@ class _QuizViewState extends State<QuizView> {
                                 color: isCurrentQuestion
                                     ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
                                     : null,
-                                child: Padding(
+                                child:
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onLongPress: () {
+                                    Clipboard.setData(ClipboardData(text: question.answer));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Risposta "${question.answer}" copiata!'),
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: const Duration(seconds: 1),
+                                      ),
+                                    );
+                                  },
+                                  child:
+                                  Padding(
                                   padding: const EdgeInsets.all(12),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +426,7 @@ class _QuizViewState extends State<QuizView> {
                                       ),
                                     ],
                                   ),
-                                ),
+                                )),
                               );
                             },
                           );
