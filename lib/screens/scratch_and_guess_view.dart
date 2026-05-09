@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';import 'package:package_info_plus/package_info_plus.dart';import '../models.dart';
+import 'package:flutter_svg/flutter_svg.dart';import 'package:package_info_plus/package_info_plus.dart';
+import 'package:quizcinese/screens/scratch_reveal.dart';import '../models.dart';
 
-class QuizView extends StatefulWidget {
+class StractchAndGuess extends StatefulWidget {
   final bool quizStarted;
   final Future<List<Question>>? questionsFuture;
   final int currentIndex;
@@ -16,7 +17,7 @@ class QuizView extends StatefulWidget {
   final Future<Map<int, QuestionStats>> Function() loadQuestionStatsMap;
   final Widget Function(Question, QuestionStats) buildQuestionStatsCard;
 
-  const QuizView({
+  const StractchAndGuess({
     super.key,
     required this.quizStarted,
     required this.questionsFuture,
@@ -33,10 +34,10 @@ class QuizView extends StatefulWidget {
   });
 
   @override
-  State<QuizView> createState() => _QuizViewState();
+  State<StractchAndGuess> createState() => _StractchAndGuessState();
 }
 
-class _QuizViewState extends State<QuizView> {
+class _StractchAndGuessState extends State<StractchAndGuess> {
   bool _isDrawerOpen = false;
 
   @override
@@ -140,7 +141,7 @@ class _QuizViewState extends State<QuizView> {
         // Contenuto principale
         Scaffold(
           appBar: AppBar(
-            title: Text('QUIZzzzz'),
+            title: Text('Scratch And Guess'),
             actions: [
               IconButton(
                 icon: const Icon(Icons.list),
@@ -193,11 +194,10 @@ class _QuizViewState extends State<QuizView> {
                       textAlign: TextAlign.end,
                     ),
 
-                    Text(
-                      current.question,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
+
+                    ScratchRevealWidget(revealText:current.answer),
+
+
                     FutureBuilder<QuestionStats>(
                       future: widget.getQuestionStats(current.id),
                       builder: (context, statsSnapshot) {
@@ -218,8 +218,18 @@ class _QuizViewState extends State<QuizView> {
                         return const SizedBox.shrink();
                       },
                     ),
-                    const SizedBox(height: 24),
-                    widget.buildAnswerInput(current),
+
+                    ElevatedButton(
+                      onPressed: () => widget.onSubmitAnswer(questions),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: Text(current.answerpinyin!, style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+
+
+
                     const SizedBox(height: 16),
                     if (widget.feedbackMessage != null)
                       Container(
@@ -275,14 +285,7 @@ class _QuizViewState extends State<QuizView> {
                       ),
                     const SizedBox(height: 32),
                     if (widget.feedbackMessage == null)
-                      ElevatedButton(
-                        onPressed: () => widget.onSubmitAnswer(questions),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: const Text('CONTROLLA', style: TextStyle(fontWeight: FontWeight.bold)),
-                      )
+                      Text("")
                     else
                       ElevatedButton(
                         onPressed: () => widget.onNextQuestion(questions),

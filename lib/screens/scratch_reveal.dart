@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:web_haptics/web_haptics.dart';
+
+class ScratchRevealWidget extends StatefulWidget {
+  final String revealText;
+
+  const ScratchRevealWidget({
+    super.key,
+    this.revealText = 'Sfondo Rivelato!',
+  });
+
+  @override
+  State<ScratchRevealWidget> createState() => _ScratchRevealWidgetState();
+}
+
+class _ScratchRevealWidgetState extends State<ScratchRevealWidget> {
+  // Lista che memorizza le coordinate tracciate dal dito.
+  // Un valore null indica che l'utente ha sollevato il dito (fine del tratto).
+  List<Offset?> points = [];
+  final haptics = WebHaptics();
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // 1. IL BACKGROUND DA RIVELARE
+        Container(
+          width: 200,
+          height: 200,
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.circular(20),
+            /*image: const DecorationImage(
+              image: NetworkImage('https://picsum.photos/300/300'), // Immagine di test
+              fit: BoxFit.cover,
+            ),*/
+          ),
+          child: Center(
+            child: Text(
+              widget.revealText,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 50,
+                fontWeight: FontWeight.bold,
+                shadows: [Shadow(blurRadius: 4, color: Colors.black)],
+              ),
+            ),
+          ),
+        ),
+
+        // 2. IL LIVELLO OPACO SOVRAPPOSTO (DA GRATTARE)
+        GestureDetector(
+          onPanStart: (details) {
+            setState(() {
+              points.add(details.localPosition);
+            });
+          },
+          onPanUpdate: (details) {
+            setState(() {
+              points.add(details.localPosition);
+              haptics.trigger([
+                Vibration(duration: 50, intensity: 0.8),
+                Vibration(delay: 30, duration: 80, intensity: 0.4),
+              ]);
+            });
+          },
+          onPanEnd: (details) {
+            setState(() {
+              points.add(null); // Segna la fine di un tratto continuo
+            });
+          },
+          child: CustomPaint(
+            size: const Size(200, 200),
+            painter: ScratchPainter(points: points),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ScratchPainter extends CustomPainter {
+  final List<Offset?> points;
+
+  ScratchPainter({required this.points});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // CRITICO: Creiamo un layer separato. Questo impedisce a BlendMode.clear
+    // di "bucare" l'intera app, limitando l'effetto solo a questo CustomPaint.
+    canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
+
+    // Disegniamo il riquadro centrale opaco
+    final backgroundPaint = Paint()..color = Colors.black.withValues(alpha:0.95);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(20),
+      ),
+      backgroundPaint,
+    );
+
+    // Impostiamo il pennello che fungerà da "gomma"
+    final eraserPaint = Paint()
+      ..blendMode = BlendMode.dstOut // Sottrae l'alpha del tratto a quello dello sfondo
+      ..color = Colors.black.withValues(alpha: 0.01) // 10% di schiarimento per ogni passaggio
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20.0 // Leggermente più largo per un effetto più morbido
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // Disegniamo le linee basandoci sui punti raccolti
+    for (int i = 0; i < points.length - 1; i++) {
+      if (points[i] != null && points[i + 1] != null) {
+        // Tratto continuo
+        canvas.drawLine(points[i]!, points[i + 1]!, eraserPaint);
+      } else if (points[i] != null && points[i + 1] == null) {
+        // Disegna anche un singolo tocco ("tap" senza trascinamento)
+        canvas.drawCircle(points[i]!, 1.0, eraserPaint);
+      }
+    }
+
+    // Uniamo il layer appena modificato al resto del canvas
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant ScratchPainter oldDelegate) {
+    // Ridisegna la UI solo se la lista dei punti è cambiata
+    //return oldDelegate.points != points;
+    return true;
+  }
+}

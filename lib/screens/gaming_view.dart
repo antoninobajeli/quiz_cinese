@@ -168,11 +168,26 @@ class _GamingViewState extends State<GamingView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: ((widget.currentIndex+1)/questions.length),
+                            minHeight: 12,
+                            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         Text(
                           'Domanda ${widget.currentIndex + 1} di ${questions.length}',
-                          style: Theme.of(context).textTheme.labelLarge,
-                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.end,
                         ),
+
                         const SizedBox(height: 16),
                         Text(
                           current.question,
@@ -204,7 +219,7 @@ class _GamingViewState extends State<GamingView> {
                           textAlign: TextAlign.center,
                           style: const TextStyle(fontSize: 24),
                           decoration: InputDecoration(
-                            hintText: 'Inserisci il carattere',
+                            hintText: 'Inserisci il pittogramma',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
