@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../models.dart';
+import 'package:flutter_svg/flutter_svg.dart';import 'package:package_info_plus/package_info_plus.dart';import '../models.dart';
 
 class QuizView extends StatefulWidget {
   final bool quizStarted;
@@ -109,6 +108,23 @@ class _QuizViewState extends State<QuizView> {
                         ),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      String version = 'v0.0.0';
+                      if (snapshot.hasData && snapshot.data != null) {
+                        version = 'v${snapshot.data!.version}';
+                      }
+                      return Text(
+                        version,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
                   ),
                 ],
               ),
