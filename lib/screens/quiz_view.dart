@@ -51,7 +51,7 @@ class _QuizViewState extends State<QuizView> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                   Theme.of(context).colorScheme.surface,
                 ],
               ),
@@ -206,8 +206,8 @@ class _QuizViewState extends State<QuizView> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: widget.feedbackMessage!.contains('corretta')
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: widget.feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
@@ -308,7 +308,7 @@ class _QuizViewState extends State<QuizView> {
               });
             },
             child: Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
             ),
           ),
 
@@ -388,7 +388,7 @@ class _QuizViewState extends State<QuizView> {
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 color: isCurrentQuestion
-                                    ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+                                    ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
                                     : null,
                                 child:
                                 InkWell(
@@ -435,7 +435,7 @@ class _QuizViewState extends State<QuizView> {
                                         question.question+"  "+question.answer,
                                         style: TextStyle(
                                           fontSize: 26,
-                                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,

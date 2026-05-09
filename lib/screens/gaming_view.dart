@@ -211,7 +211,7 @@ class _GamingViewState extends State<GamingView> {
                           ),
                           onChanged: (val) {
 
-                              widget.onSubmitAnswer(questions, val.trim()!);
+                              widget.onSubmitAnswer(questions, val.trim());
                               _controller.clear();
 
                           },
