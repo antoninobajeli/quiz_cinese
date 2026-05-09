@@ -1,10 +1,6 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -194,10 +190,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4),
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -300,10 +296,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.4),
+          color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -458,7 +454,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
               ],
             ),
           ),
@@ -495,7 +491,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -514,7 +510,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -619,7 +615,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.outlineVariant.withOpacity(0.5)),
+        side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -646,7 +642,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: colorScheme.primary.withOpacity(0.1),
+                          color: colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -675,14 +671,14 @@ class _QuizHomePageState extends State<QuizHomePage> {
                     '${question.answer} ${question.answerpinyin}',
                     style: TextStyle(
                       fontSize: 26,
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                       fontStyle: FontStyle.italic,
                     ),
                   ):Text(
                     'R: ${question.answer}',
                     style: TextStyle(
                       fontSize: 26,
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -745,7 +741,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
@@ -759,7 +755,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
             children: [
               /*Text(
                 label,
-                style: TextStyle(fontSize: 10, color: color.withOpacity(0.8), fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 10, color: color.withValues(alpha: 0.8), fontWeight: FontWeight.bold),
               ),*/
               Text(
                 value,
@@ -780,9 +776,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
