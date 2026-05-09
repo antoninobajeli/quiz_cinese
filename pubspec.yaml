@@ -1,6 +1,8 @@
 name: quizcinese
 description: Un semplice quiz Flutter che legge domande da un JSON e chiede risposte pertinenti.
 publish_to: 'none'
+version: 0.0.0+1
+
 environment:
   sdk: '>=2.19.0 <4.0.0'
 
@@ -17,7 +19,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   gh_pages: ^0.1.1
 
 flutter:
@@ -33,3 +35,9 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/logo.png"
   min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/logo.png"
+    background_color: "#ffffff"
+    theme_color: "#fff9fb"
+
