@@ -1,5 +1,8 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:quizcinese/components/rotating_card.dart';
 import 'package:web_haptics/web_haptics.dart';
 
 class ScratchRevealWidget extends StatefulWidget {
@@ -14,14 +17,39 @@ class ScratchRevealWidget extends StatefulWidget {
   State<ScratchRevealWidget> createState() => _ScratchRevealWidgetState();
 }
 
+
 class _ScratchRevealWidgetState extends State<ScratchRevealWidget> {
   // Lista che memorizza le coordinate tracciate dal dito.
   // Un valore null indica che l'utente ha sollevato il dito (fine del tratto).
   List<Offset?> points = [];
   final haptics = WebHaptics();
+
+  // Dentro il tuo State...
+  ui.Image? _image;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage('assets/scratiching_surface.png');
+  }
+
+  Future<void> _loadImage(String asset) async {
+    final data = await rootBundle.load(asset);
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    final frame = await codec.getNextFrame();
+    setState(() {
+      _image = frame.image;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
+
+
+    return
+
+      //RotatingCard(),
+      Stack(
       alignment: Alignment.center,
       children: [
         // 1. IL BACKGROUND DA RIVELARE
@@ -72,7 +100,7 @@ class _ScratchRevealWidgetState extends State<ScratchRevealWidget> {
           },
           child: CustomPaint(
             size: const Size(200, 200),
-            painter: ScratchPainter(points: points),
+            painter: ScratchPainter(points: points,image: _image),
           ),
         ),
       ],
@@ -82,24 +110,41 @@ class _ScratchRevealWidgetState extends State<ScratchRevealWidget> {
 
 class ScratchPainter extends CustomPainter {
   final List<Offset?> points;
+  final ui.Image? image; // L'immagine caricata
 
-  ScratchPainter({required this.points});
+
+
+  ScratchPainter({required this.points,required this.image});
 
   @override
   void paint(Canvas canvas, Size size) {
+    final Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
     // CRITICO: Creiamo un layer separato. Questo impedisce a BlendMode.clear
     // di "bucare" l'intera app, limitando l'effetto solo a questo CustomPaint.
-    canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
+    canvas.saveLayer(rect, Paint());
 
-    // Disegniamo il riquadro centrale opaco
-    final backgroundPaint = Paint()..color = Colors.black.withValues(alpha:0.95);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        const Radius.circular(20),
-      ),
-      backgroundPaint,
+    final rRect=RRect.fromRectAndRadius(
+      rect,
+      const Radius.circular(20),
     );
+
+    if (image != null) {
+      // Disegniamo l'immagine adattandola alle dimensioni del widget (BoxFit.fill)
+      paintImage(
+        canvas: canvas,
+        rect: rect,
+        image: image!,
+        fit: BoxFit.cover
+        // Usiamo un clip per mantenere i bordi arrotondati del box
+        //canvasAlpha: 242 // Opacità ~0.95
+      );
+    } else {
+      // Fallback se l'immagine non è pronta
+      final backgroundPaint = Paint()..color = Colors.red.withValues(alpha: 0.95);
+      canvas.drawRRect(rRect, backgroundPaint);
+    }
+
 
     // Impostiamo il pennello che fungerà da "gomma"
     final eraserPaint = Paint()
@@ -131,4 +176,6 @@ class ScratchPainter extends CustomPainter {
     //return oldDelegate.points != points;
     return true;
   }
+
+
 }
