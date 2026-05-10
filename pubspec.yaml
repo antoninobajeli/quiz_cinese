@@ -1,5 +1,5 @@
 name: quizcinese
-description: Un semplice generatore di quiz basati su domande memorizzate una base di conoscenza di parole e pittogrammi JSON.
+description: Un semplice generatore di Quiz basati su domande memorizzate una base di conoscenza di parole e pittogrammi JSON.
 publish_to: 'none'
 version: 0.1.0+1
 
