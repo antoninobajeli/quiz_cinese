@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:quizcinese/sessions/scratch_session.dart';
 import '../models.dart';
 import 'quiz_service.dart';
 import 'stats_service.dart';
-import 'quiz_session.dart';
-import 'gaming_session.dart';
+import '../sessions/quiz_session.dart';
+import '../sessions/gaming_session.dart';
 
-class QuizController extends ChangeNotifier {
+class GeneralController extends ChangeNotifier {
   final QuizService _quizService;
   final StatsService _statsService;
 
   QuizSession quizSession = QuizSession();
   GamingSession gamingSession = GamingSession();
+  ScratchSession scratchSession = ScratchSession();
 
   Future<List<Question>>? _quizQuestionsFuture;
   Future<List<Question>>? _gamingQuestionsFuture;
+  Future<List<Question>>? _scratchQuestionsFuture;
   late Future<List<Question>> allQuestionsFuture;
 
   Future<List<Question>>? get quizQuestionsFuture => _quizQuestionsFuture;
   Future<List<Question>>? get gamingQuestionsFuture => _gamingQuestionsFuture;
+  Future<List<Question>>? get scratchQuestionsFuture => _scratchQuestionsFuture;
 
-  QuizController({
+  GeneralController({
     QuizService? quizService,
     StatsService? statsService,
   }) : _quizService = quizService ?? QuizService(),
@@ -40,35 +44,6 @@ class QuizController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void confirmStartQuiz(List<Question> questions) {
-    quizSession.startQuiz(questions);
-    notifyListeners();
-  }
-
-  void submitQuizAnswer(String answer) {
-    quizSession.submitAnswer(answer);
-    notifyListeners();
-  }
-
-  void nextQuizQuestion() {
-    if (!quizSession.nextQuestion()) {
-      // Quiz completed
-      _saveQuizScore();
-    }
-    notifyListeners();
-  }
-
-  void endQuiz() {
-    _saveQuizScore();
-    notifyListeners();
-  }
-
-  void restartQuiz() {
-    quizSession.reset();
-    _quizQuestionsFuture = null;
-    notifyListeners();
-  }
-
   void startGaming(int questionCount) {
     _gamingQuestionsFuture = _quizService.loadQuizQuestions(questionCount: questionCount).then((questions) {
       gamingSession.startGaming(questions);
@@ -78,13 +53,57 @@ class QuizController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void startScratch(int questionCount) {
+    _scratchQuestionsFuture = _quizService.loadQuizQuestions(questionCount: questionCount).then((questions) {
+      scratchSession.startGaming(questions);
+      notifyListeners();
+      return questions;
+    });
+    notifyListeners();
+  }
+
+
+
+  void confirmStartQuiz(List<Question> questions) {
+    quizSession.startQuiz(questions);
+    notifyListeners();
+  }
+
   void confirmStartGaming(List<Question> questions) {
     gamingSession.startGaming(questions);
     notifyListeners();
   }
 
+  void confirmStartScratch(List<Question> questions) {
+    scratchSession.startGaming(questions);
+    notifyListeners();
+  }
+
+
+
+  void submitQuizAnswer(String answer) {
+    quizSession.submitAnswer(answer);
+    notifyListeners();
+  }
+
   void submitGamingAnswer(String selectedChar) {
     gamingSession.submitAnswer(selectedChar);
+    notifyListeners();
+  }
+
+  void submitScratchAnswer(String guessAnswer) {
+    scratchSession.submitAnswer(guessAnswer);
+    notifyListeners();
+  }
+
+
+
+
+  void nextQuizQuestion() {
+    if (!quizSession.nextQuestion()) {
+      // Quiz completed
+      _saveQuizScore();
+    }
     notifyListeners();
   }
 
@@ -95,7 +114,35 @@ class QuizController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void nextScratchQuestion() {
+    if (!scratchSession.nextQuestion()) {
+      // Quiz completed
+      _saveQuizScore();
+    }
+    notifyListeners();
+  }
+
+
+
+  void endQuiz() {
+    _saveQuizScore();
+    notifyListeners();
+  }
+
   void endGaming() {
+    notifyListeners();
+  }
+
+
+  void endScratch() {
+    _saveQuizScore();
+    notifyListeners();
+  }
+
+
+  void restartQuiz() {
+    quizSession.reset();
+    _quizQuestionsFuture = null;
     notifyListeners();
   }
 
@@ -104,6 +151,13 @@ class QuizController extends ChangeNotifier {
     _gamingQuestionsFuture = null;
     notifyListeners();
   }
+  void restartScratch() {
+    scratchSession.reset();
+    _scratchQuestionsFuture = null;
+    notifyListeners();
+  }
+
+
 
   Future<void> _saveQuizScore() async {
     await _statsService.saveQuizSession(quizSession.answers, quizSession.correctCount);

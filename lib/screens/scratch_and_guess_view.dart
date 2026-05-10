@@ -1,7 +1,10 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';import 'package:package_info_plus/package_info_plus.dart';
-import 'package:quizcinese/screens/scratch_reveal.dart';import '../models.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:quizcinese/components/scratch_reveal.dart';
+import '../models.dart';
 
 class StractchAndGuess extends StatefulWidget {
   final bool quizStarted;
@@ -9,7 +12,7 @@ class StractchAndGuess extends StatefulWidget {
   final int currentIndex;
   final String? feedbackMessage;
   final VoidCallback onStartQuiz;
-  final Function(List<Question>) onSubmitAnswer;
+  final Function(List<Question>, String selectedChar) onSubmitAnswer;
   final Function(List<Question>) onNextQuestion;
   final VoidCallback onEndGame;
   final Future<QuestionStats> Function(int) getQuestionStats;
@@ -52,7 +55,10 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.3),
                   Theme.of(context).colorScheme.surface,
                 ],
               ),
@@ -71,19 +77,19 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                   ),
                   const SizedBox(height: 40),
                   Text(
-                    'Sei pronto alla sfida?',
+                    'Pronto per Scratch and Guess?',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Metti alla prova il tuo cinese e scala la classifica! 🚀',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
@@ -94,7 +100,8 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       onPressed: widget.onStartQuiz,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -121,8 +128,10 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       return Text(
                         version,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                         textAlign: TextAlign.center,
                       );
                     },
@@ -137,7 +146,6 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
 
     return Stack(
       children: [
-
         // Contenuto principale
         Scaffold(
           appBar: AppBar(
@@ -164,11 +172,29 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
               }
 
               if (snapshot.hasError || !snapshot.hasData) {
-                return const Center(child: Text('Errore nel caricamento delle domande.'));
+                return const Center(
+                    child: Text('Errore nel caricamento delle domande.'));
               }
 
               final questions = snapshot.data!;
               final current = questions[widget.currentIndex];
+
+              /// mi costruisco la lista fittizia pe rle soluzioni fake
+              List<Question> fakes = List.from(questions);
+
+              // rimuovo dalla fittizia la risposta esatta
+              fakes.remove(current);
+
+              /// seleziono una fake
+              final currentfake1 =
+                  fakes.elementAt(Random(fakes.length).nextInt(fakes.length));
+
+              // rimuovo dalla fittizia la precedente fake
+              fakes.remove(currentfake1);
+
+              /// seleziono una fake
+              final currentfake2 =
+                  fakes.elementAt(Random(fakes.length).nextInt(fakes.length));
 
               return Padding(
                 padding: const EdgeInsets.all(16),
@@ -178,32 +204,36 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: LinearProgressIndicator(
-                        value: ((widget.currentIndex+1)/questions.length),
+                        value: ((widget.currentIndex + 1) / questions.length),
                         minHeight: 12,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.surfaceVariant,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.primary),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Domanda ${widget.currentIndex + 1} di ${questions.length}',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
                       textAlign: TextAlign.end,
                     ),
 
+                    ScratchRevealWidget(revealText: current.answer),
 
-                    ScratchRevealWidget(revealText:current.answer),
-
-
+                    // BOX che mostra l'esito del risultato
                     FutureBuilder<QuestionStats>(
                       future: widget.getQuestionStats(current.id),
                       builder: (context, statsSnapshot) {
-                        if (statsSnapshot.connectionState == ConnectionState.done && statsSnapshot.hasData) {
+                        if (statsSnapshot.connectionState ==
+                                ConnectionState.done &&
+                            statsSnapshot.hasData) {
                           final stats = statsSnapshot.data!;
-                          final total = stats.correctAnswers + stats.incorrectAnswers;
+                          final total =
+                              stats.correctAnswers + stats.incorrectAnswers;
                           if (total > 0) {
                             return Text(
                               '(${stats.correctAnswers} corrette, ${stats.incorrectAnswers} sbagliate)',
@@ -219,28 +249,63 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       },
                     ),
 
-                    ElevatedButton(
-                      onPressed: () => widget.onSubmitAnswer(questions),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Spacer(),
+                      // Pulsante della domanda
+                      ElevatedButton(
+                        onPressed: () => widget.onSubmitAnswer(
+                            questions, current.answerpinyin!),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Text(current.answerpinyin!,
+                            style: TextStyle(
+                                fontSize: 26, fontWeight: FontWeight.bold)),
                       ),
-                      child: Text(current.answerpinyin!, style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-
-
+                      Spacer(),
+                      ElevatedButton(
+                        onPressed: () => widget.onSubmitAnswer(
+                            questions, currentfake1.answerpinyin!),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Text(currentfake1.answerpinyin!,
+                            style: TextStyle(
+                                fontSize: 26, fontWeight: FontWeight.bold)),
+                      ),
+                      Spacer(),
+                      ElevatedButton(
+                        onPressed: () => widget.onSubmitAnswer(
+                            questions, currentfake2.answerpinyin!),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: Text(currentfake2.answerpinyin!,
+                            style: TextStyle(
+                                fontSize: 26, fontWeight: FontWeight.bold)),
+                      ),
+                      Spacer()
+                    ]),
 
                     const SizedBox(height: 16),
                     if (widget.feedbackMessage != null)
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: widget.feedbackMessage!.contains('corretta')
+                          color: widget.feedbackMessage!.contains('Ottimo')
                               ? Colors.green.withValues(alpha: 0.1)
                               : Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: widget.feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
+                            color: widget.feedbackMessage!.contains('Ottimo')
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                         child: Column(
@@ -248,29 +313,44 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                             Row(
                               children: [
                                 Icon(
-                                  widget.feedbackMessage!.contains('corretta') ? Icons.check_circle : Icons.error,
-                                  color: widget.feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
+                                  widget.feedbackMessage!.contains('Ottimo')
+                                      ? Icons.check_circle
+                                      : Icons.error,
+                                  color:
+                                      widget.feedbackMessage!.contains('Ottimo')
+                                          ? Colors.green
+                                          : Colors.red,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    widget.feedbackMessage!.contains('corretta')
+                                    widget.feedbackMessage!.contains('Ottimo')
                                         ? widget.feedbackMessage!
-                                        : 'Risposta errata.',
+                                        : widget.feedbackMessage!
+                                            .split(':')
+                                            .first
+                                            .trim(),
                                     style: TextStyle(
-                                      color: widget.feedbackMessage!.contains('corretta') ? Colors.green.shade700 : Colors.red.shade700,
+                                      color: widget.feedbackMessage!
+                                              .contains('Ottimo')
+                                          ? Colors.green.shade700
+                                          : Colors.red.shade700,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            if (widget.feedbackMessage!.contains('Risposta errata'))
+                            if (widget.feedbackMessage!
+                                .contains('Risposta errata'))
                               Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: Center(
                                   child: Text(
-                                    widget.feedbackMessage!.split(':').last.trim(),
+                                    widget.feedbackMessage!
+                                        .split(':')
+                                        .last
+                                        .trim(),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -290,13 +370,18 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       ElevatedButton(
                         onPressed: () => widget.onNextQuestion(questions),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
-                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onSecondary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
                         ),
                         child: Text(
-                          widget.currentIndex + 1 < questions.length ? 'PROSSIMA DOMANDA' : 'VEDI RISULTATO',
+                          widget.currentIndex + 1 < questions.length
+                              ? 'PROSSIMA DOMANDA'
+                              : 'VEDI RISULTATO',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -305,7 +390,8 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       onPressed: widget.onEndGame,
                       style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.error,
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
                       ),
                       child: const Text(
                         'FINE PARTITA',
@@ -359,11 +445,13 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                   child: Row(
                     children: [
                       Text(
-                        'Quiz Attuale',
+                        'Scratch and Guess Attuale',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
                       ),
                       const Spacer(),
                       IconButton(
@@ -387,19 +475,25 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       }
 
                       if (snapshot.hasError || !snapshot.hasData) {
-                        return const Center(child: Text('Errore nel caricamento delle domande.'));
+                        return const Center(
+                            child:
+                                Text('Errore nel caricamento delle domande.'));
                       }
 
                       final questions = snapshot.data!;
                       return FutureBuilder<Map<int, QuestionStats>>(
                         future: widget.loadQuestionStatsMap(),
                         builder: (context, statsSnapshot) {
-                          if (statsSnapshot.connectionState != ConnectionState.done) {
-                            return const Center(child: CircularProgressIndicator());
+                          if (statsSnapshot.connectionState !=
+                              ConnectionState.done) {
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
 
                           if (statsSnapshot.hasError) {
-                            return const Center(child: Text('Errore nel caricamento delle statistiche.'));
+                            return const Center(
+                                child: Text(
+                                    'Errore nel caricamento delle statistiche.'));
                           }
 
                           return ListView.builder(
@@ -407,65 +501,125 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                             itemCount: questions.length,
                             itemBuilder: (context, index) {
                               final question = questions[index];
-                              final isCurrentQuestion = index == widget.currentIndex;
+                              final isCurrentQuestion =
+                                  index == widget.currentIndex;
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 color: isCurrentQuestion
-                                    ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer
+                                        .withValues(alpha: 0.3)
                                     : null,
-                                child:
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(20),
-                                  onLongPress: () {
-                                    Clipboard.setData(ClipboardData(text: question.answer));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Risposta "${question.answer}" copiata!'),
-                                        behavior: SnackBarBehavior.floating,
-                                        duration: const Duration(seconds: 1),
-                                      ),
-                                    );
-                                  },
-                                  child:
-                                  Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
+                                child: InkWell(
+                                    borderRadius: BorderRadius.circular(20),
+                                    onLongPress: () {
+                                      Clipboard.setData(
+                                          ClipboardData(text: question.answer));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Risposta "${question.answer}" copiata!'),
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: const Duration(seconds: 1),
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            'Domanda ${index + 1}',
-                                            style: TextStyle(
-                                              fontWeight: isCurrentQuestion ? FontWeight.bold : FontWeight.normal,
-                                              color: isCurrentQuestion
-                                                  ? Theme.of(context).colorScheme.primary
-                                                  : Theme.of(context).colorScheme.onSurface,
-                                            ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'Domanda ${index + 1}',
+                                                style: TextStyle(
+                                                  fontWeight: isCurrentQuestion
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                                  color: isCurrentQuestion
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .primary
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface,
+                                                ),
+                                              ),
+                                              if (isCurrentQuestion) ...[
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  Icons.play_arrow,
+                                                  size: 16,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                ),
+                                              ],
+                                              Expanded(child: Spacer()),
+                                              Text(
+                                                question.question,
+                                                style: TextStyle(
+                                                  fontWeight: isCurrentQuestion
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                                  color: isCurrentQuestion
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .primary
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          if (isCurrentQuestion) ...[
-                                            const SizedBox(width: 8),
-                                            Icon(
-                                              Icons.play_arrow,
-                                              size: 16,
-                                              color: Theme.of(context).colorScheme.primary,
+                                          const SizedBox(height: 4),
+                                          Row(children: [
+                                            Text(
+                                              question.answer,
+                                              style: TextStyle(
+                                                fontSize: 26,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.8),
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                          ],
+                                            Expanded(child: Spacer()),
+                                            Text(
+                                              question.answerclassgr!,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.8),
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              question.answerpinyin!,
+                                              style: TextStyle(
+                                                fontSize: 26,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.8),
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            )
+                                          ])
                                         ],
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        question.question+"  "+question.answer,
-                                        style: TextStyle(
-                                          fontSize: 26,
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                )),
+                                    )),
                               );
                             },
                           );

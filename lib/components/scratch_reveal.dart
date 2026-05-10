@@ -69,7 +69,7 @@ class _ScratchRevealWidgetState extends State<ScratchRevealWidget> {
               widget.revealText,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 50,
+                fontSize: 80,
                 fontWeight: FontWeight.bold,
                 shadows: [Shadow(blurRadius: 4, color: Colors.black)],
               ),
@@ -129,6 +129,7 @@ class ScratchPainter extends CustomPainter {
       const Radius.circular(20),
     );
 
+    canvas.clipRRect(rRect);
     if (image != null) {
       // Disegniamo l'immagine adattandola alle dimensioni del widget (BoxFit.fill)
       paintImage(
@@ -141,7 +142,7 @@ class ScratchPainter extends CustomPainter {
       );
     } else {
       // Fallback se l'immagine non è pronta
-      final backgroundPaint = Paint()..color = Colors.red.withValues(alpha: 0.95);
+      final backgroundPaint = Paint()..color = Colors.white.withValues(alpha: 0.95);
       canvas.drawRRect(rRect, backgroundPaint);
     }
 

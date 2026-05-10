@@ -10,7 +10,7 @@ import 'screens/quiz_view.dart';
 import 'screens/stats_view.dart';
 import 'screens/scratch_and_guess_view.dart';
 import 'screens/gaming_view.dart';
-import 'services/quiz_controller.dart';
+import 'services/general_controller.dart';
 
 class QuizHomePage extends StatefulWidget {
   const QuizHomePage({super.key});
@@ -20,7 +20,7 @@ class QuizHomePage extends StatefulWidget {
 }
 
 class _QuizHomePageState extends State<QuizHomePage> {
-  late QuizController _controller;
+  late GeneralController _controller;
   final _answerController = TextEditingController();
   String? _selectedChoice;
   int? _selectedQuestionCount;
@@ -32,7 +32,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
   @override
   void initState() {
     super.initState();
-    _controller = QuizController();
+    _controller = GeneralController();
     _controller.addListener(_onControllerChanged);
     _confettiController = ConfettiController(duration: const Duration(seconds: 1));
     _audioPlayer = AudioPlayer();
@@ -209,6 +209,99 @@ class _QuizHomePageState extends State<QuizHomePage> {
     });
   }
 
+
+  // Gaming Mode Logic
+  void _askForScratchQuestionCount() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Pronto a Giocare a Scratch?',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text('Quante sfide vuoi affrontare?'),
+              const SizedBox(height: 32),
+              GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.3,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildScratchCountOption(5, 'Sprint'),
+                  _buildScratchCountOption(10, 'Maratona'),
+                  _buildScratchCountOption(20, 'Elite'),
+                  _buildScratchCountOption(50, 'Leggenda'),
+                ],
+              ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Annulla'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildScratchCountOption(int count, String label) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _controller.startScratch(count);
+        });
+        Navigator.of(context).pop();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onTertiaryContainer,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
   // Gaming Mode Logic
   void _askForGamingQuestionCount() {
     showDialog<void>(
@@ -300,7 +393,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _submitGamingAnswer(List<Question> questions, String selectedChar) {
-
     final current = questions[_controller.quizSession.currentIndex];
     final answer = current.type == QuestionType.text
         ? _answerController.text.trim()
@@ -314,9 +406,34 @@ class _QuizHomePageState extends State<QuizHomePage> {
         _audioPlayer.play(AssetSource('success.mp3'));
       }
     });
+  }
 
+  void _submitScratchAndGuesAnswer(List<Question> questions, String selectedChar) {
+    final current = questions[_controller.quizSession.currentIndex];
+    final answer = current.type == QuestionType.text
+        ? _answerController.text.trim()
+        : _selectedChoice ?? '';
 
+    _controller.submitScratchAnswer(selectedChar);
 
+    setState(() {
+      if (_controller.scratchSession.feedbackMessage!.contains('Ottimo')) {
+        _confettiController.play();
+        _audioPlayer.play(AssetSource('success.mp3'));
+      }
+    });
+  }
+
+  void _nextQuestion(List<Question> questions) {
+    _controller.nextQuizQuestion();
+    if (_controller.quizSession.isCompleted) {
+      _showQuizScoreDialog(questions.length);
+    } else {
+      setState(() {
+        _answerController.clear();
+        _selectedChoice = null;
+      });
+    }
   }
 
   void _nextGamingQuestion(List<Question> questions) {
@@ -326,74 +443,16 @@ class _QuizHomePageState extends State<QuizHomePage> {
     }
   }
 
-  void _showGamingScoreDialog(int total) {
-    // Salvataggio opzionale per statistiche separate se necessario
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🎮', style: TextStyle(fontSize: 64)),
-              const SizedBox(height: 16),
-              Text(
-                'Sfida Completata!',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.tertiary,
-                    ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Hai completato $total sfide di caratteri!',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _restartGaming();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.tertiary,
-                    foregroundColor: Theme.of(context).colorScheme.onTertiary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text('Ricomincia', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _restartGaming() {
-    _controller.restartGaming();
-  }
-
-  void _nextQuestion(List<Question> questions) {
-    _controller.nextQuizQuestion();
-    if (_controller.quizSession.isCompleted) {
-      _showScoreDialog(questions.length);
-    } else {
-      setState(() {
-        _answerController.clear();
-        _selectedChoice = null;
-      });
+  void _nextScratchQuestion(List<Question> questions) {
+    _controller.nextScratchQuestion();
+    if (_controller.scratchSession.isCompleted) {
+      _showScratchScoreDialog(questions.length);
     }
   }
 
-  void _showScoreDialog(int total) {
+
+
+  void _showQuizScoreDialog(int total) {
     final percentage = total > 0 ? (_controller.quizSession.correctCount / total) : 0.0;
     String message;
     String emoji;
@@ -525,9 +584,194 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
+  void _showGamingScoreDialog(int total) {
+    // Salvataggio opzionale per statistiche separate se necessario
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🎮', style: TextStyle(fontSize: 64)),
+              const SizedBox(height: 16),
+              Text(
+                'Sfida Completata!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Hai completato $total sfide di caratteri!',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _restartGaming();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    foregroundColor: Theme.of(context).colorScheme.onTertiary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Ricomincia', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showScratchScoreDialog(int total) {
+    final percentage = total > 0 ? (_controller.scratchSession.correctCount / total) : 0.0;
+    String message;
+    String emoji;
+
+    if (percentage == 1.0) {
+      message = 'Incredibile! Sei un vero esperto! 🏆';
+      emoji = '🤩';
+    } else if (percentage >= 0.7) {
+      message = 'Ottimo lavoro! Continua così! 🚀';
+      emoji = '👏';
+    } else if (percentage >= 0.4) {
+      message = 'Niente male, ma puoi migliorare! 💪';
+      emoji = '😉';
+    } else {
+      message = 'Non mollare! La prossima andrà meglio! ✨';
+      emoji = '📚';
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+              ],
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (emoji == '📚')
+                SvgPicture.asset(
+                  'assets/libri_cute.svg',
+                  height: 80,
+                )
+              else
+                Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 64),
+                ),
+              const SizedBox(height: 16),
+              Text(
+                'Scratch & Guess Completato!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${_controller.scratchSession.correctCount}',
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      ' / $total',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'domande corrette',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _restartScratch();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Ricomincia',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+
   void _endQuiz() {
     _controller.endQuiz();
-    _showScoreDialog(_controller.quizSession.currentIndex + 1);
+    _showQuizScoreDialog(_controller.quizSession.currentIndex + 1);
   }
 
   void _endGaming() {
@@ -535,10 +779,33 @@ class _QuizHomePageState extends State<QuizHomePage> {
     _showGamingScoreDialog(_controller.gamingSession.currentIndex + 1);
   }
 
+  void _endScratch() {
+    _controller.endScratch();
+    _showScratchScoreDialog(_controller.scratchSession.currentIndex + 1);
+  }
+
+
+
+
   void _restartQuiz() {
     setState(() {
       _selectedQuestionCount = null;
       _controller.restartQuiz();
+      _answerController.clear();
+      _selectedChoice = null;
+    });
+  }
+
+  void _restartGaming() {
+  setState(() {
+    _controller.restartGaming();
+  });
+  }
+
+  void _restartScratch() {
+    setState(() {
+      _selectedQuestionCount = null;
+      _controller.restartScratch();
       _answerController.clear();
       _selectedChoice = null;
     });
@@ -806,14 +1073,14 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 onEndGame: _endGaming,
               ),
               StractchAndGuess(
-                quizStarted: _controller.quizSession.isStarted,
-                questionsFuture: _controller.quizQuestionsFuture,
-                currentIndex: _controller.quizSession.currentIndex,
-                feedbackMessage: _controller.quizSession.feedbackMessage,
-                onStartQuiz: _askForQuestionCount,
-                onSubmitAnswer: _submitQuizAnswer,
-                onNextQuestion: _nextQuestion,
-                onEndGame: _endQuiz,
+                quizStarted: _controller.scratchSession.isStarted,
+                questionsFuture: _controller.scratchQuestionsFuture,
+                currentIndex: _controller.scratchSession.currentIndex,
+                feedbackMessage: _controller.scratchSession.feedbackMessage,
+                onStartQuiz: _askForScratchQuestionCount,
+                onSubmitAnswer: _submitScratchAndGuesAnswer,
+                onNextQuestion: _nextScratchQuestion,
+                onEndGame: _endScratch,
                 getQuestionStats: _getQuestionStats,
                 buildAnswerInput: _buildAnswerInput,
                 loadQuestionStatsMap: _loadQuestionStatsMap,
