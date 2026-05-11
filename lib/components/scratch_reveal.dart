@@ -5,12 +5,20 @@ import 'package:flutter/services.dart';
 import 'package:quizcinese/components/rotating_card.dart';
 import 'package:web_haptics/web_haptics.dart';
 
+class ScratchController extends ChangeNotifier {
+  void reset() {
+    notifyListeners(); // Avvisa il widget di resettare i punti
+  }
+}
+
 class ScratchRevealWidget extends StatefulWidget {
   final String revealText;
+  final ScratchController? controller; // Aggiungi il controller
 
   const ScratchRevealWidget({
     super.key,
     this.revealText = 'Sfondo Rivelato!',
+    this.controller,
   });
 
   @override
@@ -23,14 +31,30 @@ class _ScratchRevealWidgetState extends State<ScratchRevealWidget> {
   // Un valore null indica che l'utente ha sollevato il dito (fine del tratto).
   List<Offset?> points = [];
   final haptics = WebHaptics();
-
   // Dentro il tuo State...
   ui.Image? _image;
+
+
 
   @override
   void initState() {
     super.initState();
     _loadImage('assets/scratiching_surface.png');
+    // Ascolta il controller
+    widget.controller?.addListener(_resetScratch);
+  }
+
+  @override
+  void dispose() {
+    // Rimuovi il listener per evitare memory leak
+    widget.controller?.removeListener(_resetScratch);
+    super.dispose();
+  }
+
+  void _resetScratch() {
+    setState(() {
+      points.clear(); // Rimuove tutti i tratti fatti dall'utente
+    });
   }
 
   Future<void> _loadImage(String asset) async {
@@ -69,7 +93,7 @@ class _ScratchRevealWidgetState extends State<ScratchRevealWidget> {
               widget.revealText,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 80,
+                fontSize: 60,
                 fontWeight: FontWeight.bold,
                 shadows: [Shadow(blurRadius: 4, color: Colors.black)],
               ),

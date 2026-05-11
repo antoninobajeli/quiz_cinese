@@ -19,6 +19,7 @@ class StractchAndGuess extends StatefulWidget {
   final Widget Function(Question) buildAnswerInput;
   final Future<Map<int, QuestionStats>> Function() loadQuestionStatsMap;
   final Widget Function(Question, QuestionStats) buildQuestionStatsCard;
+  final ScratchController scratchController;
 
   const StractchAndGuess({
     super.key,
@@ -34,6 +35,7 @@ class StractchAndGuess extends StatefulWidget {
     required this.buildAnswerInput,
     required this.loadQuestionStatsMap,
     required this.buildQuestionStatsCard,
+    required this.scratchController,
   });
 
   @override
@@ -42,6 +44,7 @@ class StractchAndGuess extends StatefulWidget {
 
 class _StractchAndGuessState extends State<StractchAndGuess> {
   bool _isDrawerOpen = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +199,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
               final currentfake2 =
                   fakes.elementAt(Random(fakes.length).nextInt(fakes.length));
 
+
               return Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -222,7 +226,10 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       textAlign: TextAlign.end,
                     ),
 
-                    ScratchRevealWidget(revealText: current.answer),
+
+                    ScratchRevealWidget(
+                        revealText: current.answer,
+                        controller: widget.scratchController),
 
                     // BOX che mostra l'esito del risultato
                     FutureBuilder<QuestionStats>(
@@ -277,7 +284,6 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                             style: TextStyle(
                                 fontSize: 26, fontWeight: FontWeight.bold)),
                       ),
-                      Spacer(),
                       ElevatedButton(
                         onPressed: () => widget.onSubmitAnswer(
                             questions, currentfake2.answerpinyin!),
@@ -475,25 +481,19 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       }
 
                       if (snapshot.hasError || !snapshot.hasData) {
-                        return const Center(
-                            child:
-                                Text('Errore nel caricamento delle domande.'));
+                        return const Center(child: Text('Errore nel caricamento delle domande.'));
                       }
 
                       final questions = snapshot.data!;
                       return FutureBuilder<Map<int, QuestionStats>>(
                         future: widget.loadQuestionStatsMap(),
                         builder: (context, statsSnapshot) {
-                          if (statsSnapshot.connectionState !=
-                              ConnectionState.done) {
-                            return const Center(
-                                child: CircularProgressIndicator());
+                          if (statsSnapshot.connectionState != ConnectionState.done) {
+                            return const Center(child: CircularProgressIndicator());
                           }
 
                           if (statsSnapshot.hasError) {
-                            return const Center(
-                                child: Text(
-                                    'Errore nel caricamento delle statistiche.'));
+                            return const Center(child: Text('Errore nel caricamento delle statistiche.'));
                           }
 
                           return ListView.builder(
@@ -501,125 +501,101 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                             itemCount: questions.length,
                             itemBuilder: (context, index) {
                               final question = questions[index];
-                              final isCurrentQuestion =
-                                  index == widget.currentIndex;
+                              final isCurrentQuestion = index == widget.currentIndex;
+
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 color: isCurrentQuestion
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                        .withValues(alpha: 0.3)
+                                    ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
                                     : null,
                                 child: InkWell(
-                                    borderRadius: BorderRadius.circular(20),
-                                    onLongPress: () {
-                                      Clipboard.setData(
-                                          ClipboardData(text: question.answer));
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              'Risposta "${question.answer}" copiata!'),
-                                          behavior: SnackBarBehavior.floating,
-                                          duration: const Duration(seconds: 1),
-                                        ),
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                'Domanda ${index + 1}',
-                                                style: TextStyle(
-                                                  fontWeight: isCurrentQuestion
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                  color: isCurrentQuestion
-                                                      ? Theme.of(context)
-                                                          .colorScheme
-                                                          .primary
-                                                      : Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurface,
-                                                ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  onLongPress: () {
+                                    Clipboard.setData(ClipboardData(text: question.answer));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Risposta "${question.answer}" copiata!'),
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: const Duration(seconds: 1),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'Domanda ${index + 1}',
+                                              style: TextStyle(
+                                                fontWeight: isCurrentQuestion ? FontWeight.bold : FontWeight.normal,
+                                                color: isCurrentQuestion
+                                                    ? Theme.of(context).colorScheme.primary
+                                                    : Theme.of(context).colorScheme.onSurface,
                                               ),
-                                              if (isCurrentQuestion) ...[
-                                                const SizedBox(width: 8),
-                                                Icon(
-                                                  Icons.play_arrow,
-                                                  size: 16,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary,
-                                                ),
-                                              ],
-                                              Expanded(child: Spacer()),
-                                              Text(
-                                                question.question,
-                                                style: TextStyle(
-                                                  fontWeight: isCurrentQuestion
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                  color: isCurrentQuestion
-                                                      ? Theme.of(context)
-                                                          .colorScheme
-                                                          .primary
-                                                      : Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurface,
-                                                ),
+                                            ),
+                                            if (isCurrentQuestion) ...[
+                                              const SizedBox(width: 8),
+                                              Icon(
+                                                Icons.play_arrow,
+                                                size: 16,
+                                                color: Theme.of(context).colorScheme.primary,
                                               ),
                                             ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(children: [
+                                            // CORREZIONE 1: Usa solo Spacer(), non Expanded(child: Spacer())
+                                            const Spacer(),
+                                            Text(
+                                              question.question,
+                                              style: TextStyle(
+                                                fontWeight: isCurrentQuestion ? FontWeight.bold : FontWeight.normal,
+                                                color: isCurrentQuestion
+                                                    ? Theme.of(context).colorScheme.primary
+                                                    : Theme.of(context).colorScheme.onSurface,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
                                             Text(
                                               question.answer,
                                               style: TextStyle(
                                                 fontSize: 26,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withValues(alpha: 0.8),
+                                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                            Expanded(child: Spacer()),
+                                            // CORREZIONE 2: Usa solo Spacer()
+                                            const Spacer(),
                                             Text(
-                                              question.answerclassgr!,
+                                              question.answerclassgr ?? '',
                                               style: TextStyle(
                                                 fontSize: 13,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withValues(alpha: 0.8),
+                                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                             ),
+                                            const SizedBox(width: 8), // Spazio tra i testi
                                             Text(
-                                              question.answerpinyin!,
+                                              question.answerpinyin ?? '',
                                               style: TextStyle(
                                                 fontSize: 26,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withValues(alpha: 0.8),
+                                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                             )
-                                          ])
-                                        ],
-                                      ),
-                                    )),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               );
                             },
                           );
@@ -627,7 +603,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       );
                     },
                   ),
-                ),
+                )
               ],
             ),
           ),

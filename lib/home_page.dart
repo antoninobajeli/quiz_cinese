@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-
+import 'components/scratch_reveal.dart';
 import 'models.dart';
 import 'screens/quiz_view.dart';
 import 'screens/stats_view.dart';
@@ -22,6 +22,7 @@ class QuizHomePage extends StatefulWidget {
 class _QuizHomePageState extends State<QuizHomePage> {
   late GeneralController _controller;
   final _answerController = TextEditingController();
+  final _scratchController= ScratchController();
   String? _selectedChoice;
   int? _selectedQuestionCount;
   int _currentTabIndex = 0;
@@ -34,7 +35,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
     super.initState();
     _controller = GeneralController();
     _controller.addListener(_onControllerChanged);
-    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 1));
     _audioPlayer = AudioPlayer();
   }
 
@@ -55,8 +57,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
   Future<Map<int, QuestionStats>> _loadQuestionStatsMap() async {
     return _controller.loadStats();
   }
-
-
 
   void _askForQuestionCount() {
     showDialog<void>(
@@ -162,7 +162,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
+          color: Theme.of(context)
+              .colorScheme
+              .primaryContainer
+              .withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
@@ -209,7 +212,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
     });
   }
 
-
   // Gaming Mode Logic
   void _askForScratchQuestionCount() {
     showDialog<void>(
@@ -225,9 +227,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
               Text(
                 'Pronto a Giocare a Scratch?',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.tertiary,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
               ),
               const SizedBox(height: 8),
               const Text('Quante sfide vuoi affrontare?'),
@@ -258,7 +260,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-
   Widget _buildScratchCountOption(int count, String label) {
     return InkWell(
       onTap: () {
@@ -270,10 +271,14 @@ class _QuizHomePageState extends State<QuizHomePage> {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+          color: Theme.of(context)
+              .colorScheme
+              .tertiaryContainer
+              .withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
+            color:
+                Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -300,7 +305,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
       ),
     );
   }
-
 
   // Gaming Mode Logic
   void _askForGamingQuestionCount() {
@@ -361,10 +365,14 @@ class _QuizHomePageState extends State<QuizHomePage> {
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+          color: Theme.of(context)
+              .colorScheme
+              .tertiaryContainer
+              .withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
+            color:
+                Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -408,7 +416,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
     });
   }
 
-  void _submitScratchAndGuesAnswer(List<Question> questions, String selectedChar) {
+  void _submitScratchAndGuesAnswer(
+      List<Question> questions, String selectedChar) {
     final current = questions[_controller.quizSession.currentIndex];
     final answer = current.type == QuestionType.text
         ? _answerController.text.trim()
@@ -445,15 +454,15 @@ class _QuizHomePageState extends State<QuizHomePage> {
 
   void _nextScratchQuestion(List<Question> questions) {
     _controller.nextScratchQuestion();
+    _scratchController.reset();
     if (_controller.scratchSession.isCompleted) {
       _showScratchScoreDialog(questions.length);
     }
   }
 
-
-
   void _showQuizScoreDialog(int total) {
-    final percentage = total > 0 ? (_controller.quizSession.correctCount / total) : 0.0;
+    final percentage =
+        total > 0 ? (_controller.quizSession.correctCount / total) : 0.0;
     String message;
     String emoji;
 
@@ -485,7 +494,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.1),
               ],
             ),
           ),
@@ -520,9 +532,13 @@ class _QuizHomePageState extends State<QuizHomePage> {
               ),
               const SizedBox(height: 32),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -541,7 +557,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -601,9 +620,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
               Text(
                 'Sfida Completata!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.tertiary,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
               ),
               const SizedBox(height: 24),
               Text(
@@ -623,9 +642,11 @@ class _QuizHomePageState extends State<QuizHomePage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.tertiary,
                     foregroundColor: Theme.of(context).colorScheme.onTertiary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Ricomincia', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('Ricomincia',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -636,7 +657,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _showScratchScoreDialog(int total) {
-    final percentage = total > 0 ? (_controller.scratchSession.correctCount / total) : 0.0;
+    final percentage =
+        total > 0 ? (_controller.scratchSession.correctCount / total) : 0.0;
     String message;
     String emoji;
 
@@ -668,7 +690,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.1),
               ],
             ),
           ),
@@ -689,23 +714,27 @@ class _QuizHomePageState extends State<QuizHomePage> {
               Text(
                 'Scratch & Guess Completato!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
               ),
               const SizedBox(height: 12),
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
               const SizedBox(height: 32),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -724,7 +753,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -734,8 +766,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
               Text(
                 'domande corrette',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
               ),
               const SizedBox(height: 40),
               SizedBox(
@@ -767,8 +799,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-
-
   void _endQuiz() {
     _controller.endQuiz();
     _showQuizScoreDialog(_controller.quizSession.currentIndex + 1);
@@ -784,9 +814,6 @@ class _QuizHomePageState extends State<QuizHomePage> {
     _showScratchScoreDialog(_controller.scratchSession.currentIndex + 1);
   }
 
-
-
-
   void _restartQuiz() {
     setState(() {
       _selectedQuestionCount = null;
@@ -797,9 +824,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
   }
 
   void _restartGaming() {
-  setState(() {
-    _controller.restartGaming();
-  });
+    setState(() {
+      _controller.restartGaming();
+    });
   }
 
   void _restartScratch() {
@@ -850,82 +877,90 @@ class _QuizHomePageState extends State<QuizHomePage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onLongPress: () {
-          Clipboard.setData(ClipboardData(text: question.answer));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Risposta "${question.answer}" copiata!'),
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 1),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onLongPress: () {
+            Clipboard.setData(ClipboardData(text: question.answer));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Risposta "${question.answer}" copiata!'),
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 1),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '#${question.id}',
-                          style: TextStyle(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '#${question.id}',
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              question.question,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 15),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          question.question,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  (question.answerpinyin != null && question.answerpinyin!.isNotEmpty)?
-                  Text(
-                    '${question.answer} ${question.answerpinyin}',
-                    style: TextStyle(
-                      fontSize: 26,
-                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ):Text(
-                    'R: ${question.answer}',
-                    style: TextStyle(
-                      fontSize: 26,
-                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  if (question.answerpinyin != null || question.answerclassgr != null) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        /*if (question.answerpinyin != null && question.answerpinyin!.isNotEmpty)
+                      const SizedBox(height: 4),
+                      (question.answerpinyin != null &&
+                              question.answerpinyin!.isNotEmpty)
+                          ? Text(
+                              '${question.answer} ${question.answerpinyin}',
+                              style: TextStyle(
+                                fontSize: 26,
+                                color: colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.8),
+                                fontStyle: FontStyle.italic,
+                              ),
+                            )
+                          : Text(
+                              'R: ${question.answer}',
+                              style: TextStyle(
+                                fontSize: 26,
+                                color: colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.8),
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                      if (question.answerpinyin != null ||
+                          question.answerclassgr != null) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            /*if (question.answerpinyin != null && question.answerpinyin!.isNotEmpty)
                           _buildSmallTag(
                             text: question.answerpinyin!,
                             color: colorScheme.secondary,
@@ -936,39 +971,37 @@ class _QuizHomePageState extends State<QuizHomePage> {
                             question.answerclassgr != null &&
                             question.answerclassgr!.isNotEmpty)
                           const SizedBox(width: 8),*/
-                        if (question.answerclassgr != null && question.answerclassgr!.isNotEmpty)
-                          _buildSmallTag(
-                            text: question.answerclassgr!,
-                            color: colorScheme.tertiary,
-                            icon: Icons.label_outline_rounded,
-                          ),
+                            if (question.answerclassgr != null &&
+                                question.answerclassgr!.isNotEmpty)
+                              _buildSmallTag(
+                                text: question.answerclassgr!,
+                                color: colorScheme.tertiary,
+                                icon: Icons.label_outline_rounded,
+                              ),
+                          ],
+                        ),
                       ],
-                    ),
-                  ],
-                ],
-              ),
+                    ],
+                  ),
+                ),
+                Column(children: [
+                  _buildStatBadge(
+                    label: 'Tot.',
+                    value: '$totalAsked',
+                    icon: Icons.history,
+                    color: Colors.blueGrey,
+                  ),
+                  _buildStatBadge(
+                    label: 'Rate',
+                    value: '${(ratio * 100).toInt()}%',
+                    icon: Icons.star_rounded,
+                    color: Colors.orange,
+                  ),
+                ])
+              ],
             ),
-            Column(children: [
-              _buildStatBadge(
-                label: 'Tot.',
-                value: '$totalAsked',
-                icon: Icons.history,
-                color: Colors.blueGrey,
-              ),
-              _buildStatBadge(
-                label: 'Rate',
-                value: '${(ratio * 100).toInt()}%',
-                icon: Icons.star_rounded,
-                color: Colors.orange,
-              ),
-            ]
-            )
-
-          ],
-        ),
-      ),
-    )
-    );
+          ),
+        ));
   }
 
   Widget _buildStatBadge({
@@ -998,7 +1031,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
               ),*/
               Text(
                 value,
-                style: TextStyle(fontSize: 14, color: color, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 14, color: color, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -1073,24 +1107,25 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 onEndGame: _endGaming,
               ),
               StractchAndGuess(
-                quizStarted: _controller.scratchSession.isStarted,
-                questionsFuture: _controller.scratchQuestionsFuture,
-                currentIndex: _controller.scratchSession.currentIndex,
-                feedbackMessage: _controller.scratchSession.feedbackMessage,
-                onStartQuiz: _askForScratchQuestionCount,
-                onSubmitAnswer: _submitScratchAndGuesAnswer,
-                onNextQuestion: _nextScratchQuestion,
-                onEndGame: _endScratch,
-                getQuestionStats: _getQuestionStats,
-                buildAnswerInput: _buildAnswerInput,
-                loadQuestionStatsMap: _loadQuestionStatsMap,
-                buildQuestionStatsCard: _buildQuestionStatsCard,
-              ),
+                  quizStarted: _controller.scratchSession.isStarted,
+                  questionsFuture: _controller.scratchQuestionsFuture,
+                  currentIndex: _controller.scratchSession.currentIndex,
+                  feedbackMessage: _controller.scratchSession.feedbackMessage,
+                  onStartQuiz: _askForScratchQuestionCount,
+                  onSubmitAnswer: _submitScratchAndGuesAnswer,
+                  onNextQuestion: _nextScratchQuestion,
+                  onEndGame: _endScratch,
+                  getQuestionStats: _getQuestionStats,
+                  buildAnswerInput: _buildAnswerInput,
+                  loadQuestionStatsMap: _loadQuestionStatsMap,
+                  buildQuestionStatsCard: _buildQuestionStatsCard,
+                  scratchController: _scratchController),
               StatsView(
                 allQuestionsFuture: _controller.allQuestionsFuture,
                 loadQuestionStatsMap: _loadQuestionStatsMap,
                 currentSort: _allQuestionsSort,
-                onSortChanged: (sort) => setState(() => _allQuestionsSort = sort),
+                onSortChanged: (sort) =>
+                    setState(() => _allQuestionsSort = sort),
                 buildQuestionStatsCard: _buildQuestionStatsCard,
               ),
             ],
@@ -1111,7 +1146,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
               ],
               createParticlePath: (size) {
                 final path = Path();
-                path.addOval(Rect.fromCircle(center: Offset.zero, radius: size.width / 2));
+                path.addOval(Rect.fromCircle(
+                    center: Offset.zero, radius: size.width / 2));
                 return path;
               },
             ),
