@@ -1,7 +1,7 @@
 name: quizcinese
 description: Un semplice generatore di Quiz basati su domande memorizzate una base di conoscenza di parole e pittogrammi JSON.
 publish_to: 'none'
-version: 0.1.3+1
+version: 0.1.4+1
 
 environment:
   sdk: '>=2.19.0 <4.0.0'

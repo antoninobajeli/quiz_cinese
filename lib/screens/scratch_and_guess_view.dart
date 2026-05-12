@@ -60,8 +60,8 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                 colors: [
                   Theme.of(context)
                       .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.3),
+                      .tertiaryContainer
+                      .withValues(alpha: 0.3,green: 0.5,red: 0.5),
                   Theme.of(context).colorScheme.surface,
                 ],
               ),
@@ -89,7 +89,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Metti alla prova il tuo cinese e scala la classifica! 🚀',
+                    'Gratta per scoprire il carattere ed indovina il significato! 🚀',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
