@@ -39,7 +39,54 @@ class QuizView extends StatefulWidget {
 }
 
 class _QuizViewState extends State<QuizView> {
+  static bool _hasSeenQuizHelper = false;
   bool _isDrawerOpen = false;
+  bool _showQuizHelper = !_hasSeenQuizHelper;
+  bool _helperMeasured = false;
+  final GlobalKey _answerInputKey = GlobalKey();
+  final GlobalKey _verifyButtonKey = GlobalKey();
+  Rect? _answerInputRect;
+  Rect? _verifyButtonRect;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureHelperTargets();
+    });
+  }
+
+  void _measureHelperTargets() {
+    if (!_showQuizHelper || _helperMeasured) return;
+
+    final RenderBox? overlayBox = context.findRenderObject() as RenderBox?;
+    final RenderBox? answerBox =
+        _answerInputKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? buttonBox =
+        _verifyButtonKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (overlayBox != null && answerBox != null && buttonBox != null) {
+      final answerRect = answerBox.localToGlobal(Offset.zero, ancestor: overlayBox) & answerBox.size;
+      final buttonRect = buttonBox.localToGlobal(Offset.zero, ancestor: overlayBox) & buttonBox.size;
+      setState(() {
+        _answerInputRect = answerRect.inflate(8);
+        _verifyButtonRect = buttonRect.inflate(8);
+        _helperMeasured = true;
+      });
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureHelperTargets();
+    });
+  }
+
+  void _dismissQuizHelper() {
+    setState(() {
+      _showQuizHelper = false;
+      _hasSeenQuizHelper = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,7 +278,10 @@ class _QuizViewState extends State<QuizView> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    widget.buildAnswerInput(current),
+                    Container(
+                      key: _answerInputKey,
+                      child: widget.buildAnswerInput(current),
+                    ),
                     const SizedBox(height: 16),
                     if (widget.feedbackMessage != null)
                       Container(
@@ -301,15 +351,18 @@ class _QuizViewState extends State<QuizView> {
                       ),
                     const SizedBox(height: 32),
                     if (widget.feedbackMessage == null)
-                      ElevatedButton(
-                        onPressed: () => widget.onSubmitAnswer(questions),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                      Container(
+                        key: _verifyButtonKey,
+                        child: ElevatedButton(
+                          onPressed: () => widget.onSubmitAnswer(questions),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: const Text('CONTROLLA',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
-                        child: const Text('CONTROLLA',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
                       )
                     else
                       ElevatedButton(
@@ -352,6 +405,9 @@ class _QuizViewState extends State<QuizView> {
             },
           ),
         ),
+
+        if (_showQuizHelper)
+          _buildQuizHelperOverlay(context),
 
         // Overlay scuro quando il pannello è aperto
         if (_isDrawerOpen)
@@ -537,6 +593,135 @@ class _QuizViewState extends State<QuizView> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildQuizHelperOverlay(BuildContext context) {
+    return Positioned.fill(
+      child: GestureDetector(
+        onTap: _dismissQuizHelper,
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.75),
+          child: Stack(
+            children: [
+              if (_answerInputRect != null)
+                Positioned.fromRect(
+                  rect: _answerInputRect!,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.18),
+                        border: Border.all(color: Colors.amber, width: 3),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              if (_verifyButtonRect != null)
+                Positioned.fromRect(
+                  rect: _verifyButtonRect!,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.lightBlue.withValues(alpha: 0.18),
+                        border: Border.all(color: Colors.lightBlueAccent, width: 3),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              Positioned(
+                left: 24,
+                right: 24,
+                top: 240,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surface
+                        .withValues(alpha: 0.95),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Come funziona',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        '1. Scrivi qui la tua risposta in cinese nel campo di inserimento evidenziato.',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '2. Poi premi il pulsante CONTROLLA per verificare se la risposta è corretta.',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Tocca lo schermo per chiudere questa guida e iniziare il quiz.',
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (_answerInputRect != null)
+                Positioned(
+                  left: _answerInputRect!.left,
+                  top: _answerInputRect!.bottom + 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    width: 220,
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade100,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'Qui inserisci la tua risposta. Usa i caratteri cinesi o pinyin se richiesto.',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+              if (_verifyButtonRect != null)
+                Positioned(
+                  left: _verifyButtonRect!.left,
+                  top: _verifyButtonRect!.bottom + 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.lightBlue.shade100,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'Premi CONTROLLA per verificare subito la tua risposta.',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

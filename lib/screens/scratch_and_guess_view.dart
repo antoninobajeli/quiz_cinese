@@ -226,7 +226,13 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       textAlign: TextAlign.end,
                     ),
 
-
+                    Text(textAlign: TextAlign.center,
+                      'Gratta la CARD per scoprire il carattere da indovinare!!',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
                     ScratchRevealWidget(
                         revealText: current.answer,
                         controller: widget.scratchController),
@@ -255,6 +261,13 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                         return const SizedBox.shrink();
                       },
                     ),
+                    Text(textAlign: TextAlign.center,
+                      'Indovina quale è il corretto Pinyin\v del carattere che hai scoperto.',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
 
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Spacer(),
@@ -263,9 +276,13 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                         onPressed: () => widget.onSubmitAnswer(
                             questions, current.answerpinyin!),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                          Theme.of(context).colorScheme.onPrimary,
+                          elevation: 4,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         child: Text(current.answerpinyin!,
                             style: TextStyle(
@@ -276,21 +293,30 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                         onPressed: () => widget.onSubmitAnswer(
                             questions, currentfake1.answerpinyin!),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                          Theme.of(context).colorScheme.onPrimary,
+                          elevation: 4,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         child: Text(currentfake1.answerpinyin!,
                             style: TextStyle(
                                 fontSize: 26, fontWeight: FontWeight.bold)),
                       ),
+                      Spacer(),
                       ElevatedButton(
                         onPressed: () => widget.onSubmitAnswer(
                             questions, currentfake2.answerpinyin!),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                          Theme.of(context).colorScheme.onPrimary,
+                          elevation: 4,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         child: Text(currentfake2.answerpinyin!,
                             style: TextStyle(

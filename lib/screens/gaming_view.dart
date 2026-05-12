@@ -280,7 +280,7 @@ class _GamingViewState extends State<GamingView> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color:
-                                  widget.feedbackMessage!.contains('corretta')
+                                  widget.feedbackMessage!.contains('corretto')
                                       ? Colors.green.withValues(alpha: 0.1)
                                       : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
@@ -290,7 +290,7 @@ class _GamingViewState extends State<GamingView> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color:
-                                    widget.feedbackMessage!.contains('corretta')
+                                    widget.feedbackMessage!.contains('corretto')
                                         ? Colors.green.shade700
                                         : Colors.red.shade700,
                                 fontWeight: FontWeight.bold,
