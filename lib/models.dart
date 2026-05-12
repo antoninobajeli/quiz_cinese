@@ -1,6 +1,9 @@
 enum AllQuestionsSortOption {
   id,
-  question,
+  question_az,
+  question_za,
+  pinyin_az,
+  pinyin_za,
   ratio,
   totalAsked,
 }

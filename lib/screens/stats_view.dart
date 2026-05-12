@@ -54,8 +54,14 @@ class StatsView extends StatelessWidget {
               switch (currentSort) {
                 case AllQuestionsSortOption.id:
                   return a.id.compareTo(b.id);
-                case AllQuestionsSortOption.question:
+                case AllQuestionsSortOption.question_az:
                   return a.question.toLowerCase().compareTo(b.question.toLowerCase());
+                case AllQuestionsSortOption.question_za:
+                  return b.question.toLowerCase().compareTo(a.question.toLowerCase());
+                case AllQuestionsSortOption.pinyin_az:
+                  return a.answerpinyin!.toLowerCase().compareTo(b.answerpinyin!.toLowerCase());
+                case AllQuestionsSortOption.pinyin_za:
+                  return b.answerpinyin!.toLowerCase().compareTo(a.answerpinyin!.toLowerCase());
                 case AllQuestionsSortOption.ratio:
                   return ratioA.compareTo(ratioB);
                 case AllQuestionsSortOption.totalAsked:
@@ -87,16 +93,28 @@ class StatsView extends StatelessWidget {
                             child: Text('ID'),
                           ),
                           DropdownMenuItem(
-                            value: AllQuestionsSortOption.question,
-                            child: Text('Domanda'),
+                            value: AllQuestionsSortOption.question_az,
+                            child: Text('Italiano A-Z'),
+                          ),
+                          DropdownMenuItem(
+                            value: AllQuestionsSortOption.question_za,
+                            child: Text('Italiano Z-A'),
+                          ),
+                          DropdownMenuItem(
+                            value: AllQuestionsSortOption.pinyin_az,
+                            child: Text('Piniyn A-Z'),
+                          ),
+                          DropdownMenuItem(
+                            value: AllQuestionsSortOption.pinyin_az,
+                            child: Text('Piniyn Z-A'),
                           ),
                           DropdownMenuItem(
                             value: AllQuestionsSortOption.ratio,
-                            child: Text('Rapporto'),
+                            child: Text('Apprendimmento'),
                           ),
                           DropdownMenuItem(
                             value: AllQuestionsSortOption.totalAsked,
-                            child: Text('N. risposte'),
+                            child: Text('N. esercitazioni'),
                           ),
                         ],
                       ),

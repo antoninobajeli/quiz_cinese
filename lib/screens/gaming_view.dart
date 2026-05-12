@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../models.dart';
 
 class GamingView extends StatefulWidget {
@@ -32,14 +33,14 @@ class GamingView extends StatefulWidget {
 }
 
 class _GamingViewState extends State<GamingView> {
-  final _controller = TextEditingController();
+  final _tecontroller = TextEditingController();
   String? _targetChar;
   final _random = Random();
   bool _isDrawerOpen = false;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _tecontroller.dispose();
     super.dispose();
   }
 
@@ -56,7 +57,10 @@ class _GamingViewState extends State<GamingView> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.3),
+                    Theme.of(context)
+                        .colorScheme
+                        .tertiaryContainer
+                        .withValues(alpha: 0.3),
                     Theme.of(context).colorScheme.surface,
                   ],
                 ),
@@ -73,17 +77,19 @@ class _GamingViewState extends State<GamingView> {
                     const SizedBox(height: 40),
                     Text(
                       'Modalità Gaming 🎮',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.tertiary,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Focus su un singolo carattere alla volta. Più veloce, più intenso!',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                       textAlign: TextAlign.center,
                     ),
@@ -94,8 +100,10 @@ class _GamingViewState extends State<GamingView> {
                       child: ElevatedButton(
                         onPressed: widget.onStartGaming,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.tertiary,
-                          foregroundColor: Theme.of(context).colorScheme.onTertiary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.tertiary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onTertiary,
                           elevation: 4,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -110,6 +118,26 @@ class _GamingViewState extends State<GamingView> {
                           ),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    FutureBuilder<PackageInfo>(
+                      future: PackageInfo.fromPlatform(),
+                      builder: (context, snapshot) {
+                        String version = 'v0.0.0';
+                        if (snapshot.hasData && snapshot.data != null) {
+                          version = 'v${snapshot.data!.version}';
+                        }
+                        return Text(
+                          version,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                          textAlign: TextAlign.center,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -128,15 +156,16 @@ class _GamingViewState extends State<GamingView> {
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
-          return const Center(child: Text('Errore nel caricamento delle domande.'));
+          return const Center(
+              child: Text('Errore nel caricamento delle domande.'));
         }
 
         final questions = snapshot.data!;
         final current = questions[widget.currentIndex];
-        
+
         // Se non abbiamo ancora scelto il carattere per questa domanda, lo facciamo
         if (_targetChar == null || !current.answer.contains(_targetChar!)) {
-           _targetChar = current.answer[_random.nextInt(current.answer.length)];
+          _targetChar = current.answer[_random.nextInt(current.answer.length)];
         }
 
         return Stack(
@@ -168,30 +197,38 @@ class _GamingViewState extends State<GamingView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: LinearProgressIndicator(
-                            value: ((widget.currentIndex+1)/questions.length),
+                            value:
+                                ((widget.currentIndex + 1) / questions.length),
                             minHeight: 12,
-                            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.surfaceVariant,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.primary),
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           'Domanda ${widget.currentIndex + 1} di ${questions.length}',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                                fontWeight: FontWeight.bold,
+                              ),
                           textAlign: TextAlign.end,
                         ),
 
                         const SizedBox(height: 16),
                         Text(
                           current.question,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
@@ -200,7 +237,10 @@ class _GamingViewState extends State<GamingView> {
                           height: charDisplayHeight,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: Text(
@@ -213,39 +253,46 @@ class _GamingViewState extends State<GamingView> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        TextField(
-                          controller: _controller,
-                          autofocus: true,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 24),
-                          decoration: InputDecoration(
-                            hintText: 'Inserisci il pittogramma',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                        if (widget.feedbackMessage == null)
+                          TextField(
+                            controller: _tecontroller,
+                            keyboardType: TextInputType.text,
+                            textInputAction: TextInputAction.send,
+                            autofocus: true,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 24),
+                            decoration: InputDecoration(
+                              //hintText: 'Inserisci il carattere',
+                              labelText: '请输入文字 (Inserisci il carattere)',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
-                          ),
-                          onChanged: (val) {
-
+                            onSubmitted: (val) {
                               widget.onSubmitAnswer(questions, val.trim());
-                              _controller.clear();
+                              _tecontroller.clear();
+                            },
+                          ),
 
-                          },
-                        ),
                         const SizedBox(height: 24),
                         if (widget.feedbackMessage != null)
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: widget.feedbackMessage!.contains('corretta')
-                                  ? Colors.green.withValues(alpha: 0.1)
-                                  : Colors.red.withValues(alpha: 0.1),
+                              color:
+                                  widget.feedbackMessage!.contains('corretta')
+                                      ? Colors.green.withValues(alpha: 0.1)
+                                      : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
                               widget.feedbackMessage!,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: widget.feedbackMessage!.contains('corretta') ? Colors.green.shade700 : Colors.red.shade700,
+                                color:
+                                    widget.feedbackMessage!.contains('corretta')
+                                        ? Colors.green.shade700
+                                        : Colors.red.shade700,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -261,19 +308,25 @@ class _GamingViewState extends State<GamingView> {
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
                             ),
                             child: Text(
-                              widget.currentIndex + 1 < questions.length ? 'PROSSIMA' : 'VEDI RISULTATO',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              widget.currentIndex + 1 < questions.length
+                                  ? 'PROSSIMA'
+                                  : 'VEDI RISULTATO',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                         const SizedBox(height: 16),
                         TextButton(
                           onPressed: widget.onEndGame,
                           style: TextButton.styleFrom(
-                            foregroundColor: Theme.of(context).colorScheme.error,
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                            foregroundColor:
+                                Theme.of(context).colorScheme.error,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 24),
                           ),
                           child: const Text(
                             'FINE PARTITA',
@@ -307,7 +360,8 @@ class _GamingViewState extends State<GamingView> {
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              right: _isDrawerOpen ? 0 : -MediaQuery.of(context).size.width * 0.8,
+              right:
+                  _isDrawerOpen ? 0 : -MediaQuery.of(context).size.width * 0.8,
               top: 0,
               bottom: 0,
               width: MediaQuery.of(context).size.width * 0.8,
@@ -328,10 +382,15 @@ class _GamingViewState extends State<GamingView> {
                         children: [
                           Text(
                             'Gaming Attuale',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onTertiaryContainer,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onTertiaryContainer,
+                                ),
                           ),
                           const Spacer(),
                           IconButton(
@@ -352,66 +411,81 @@ class _GamingViewState extends State<GamingView> {
                         itemCount: questions.length,
                         itemBuilder: (context, index) {
                           final question = questions[index];
-                          final isCurrentQuestion = index == widget.currentIndex;
+                          final isCurrentQuestion =
+                              index == widget.currentIndex;
                           return Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             color: isCurrentQuestion
-                                ? Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.3)
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .tertiaryContainer
+                                    .withValues(alpha: 0.3)
                                 : null,
-                            child:
-                            InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onLongPress: () {
-                                Clipboard.setData(ClipboardData(text: question.answer));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Risposta "${question.answer}" copiata!'),
-                                    behavior: SnackBarBehavior.floating,
-                                    duration: const Duration(seconds: 1),
-                                  ),
-                                );
-                              },
-                              child:
-
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            child: InkWell(
+                                borderRadius: BorderRadius.circular(20),
+                                onLongPress: () {
+                                  Clipboard.setData(
+                                      ClipboardData(text: question.answer));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Risposta "${question.answer}" copiata!'),
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        'Domanda ${index + 1}',
-                                        style: TextStyle(
-                                          fontWeight: isCurrentQuestion ? FontWeight.bold : FontWeight.normal,
-                                          color: isCurrentQuestion
-                                              ? Theme.of(context).colorScheme.tertiary
-                                              : Theme.of(context).colorScheme.onSurface,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Domanda ${index + 1}',
+                                            style: TextStyle(
+                                              fontWeight: isCurrentQuestion
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                              color: isCurrentQuestion
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .tertiary
+                                                  : Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface,
+                                            ),
+                                          ),
+                                          if (isCurrentQuestion) ...[
+                                            const SizedBox(width: 8),
+                                            Icon(
+                                              Icons.play_arrow,
+                                              size: 16,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .tertiary,
+                                            ),
+                                          ],
+                                        ],
                                       ),
-                                      if (isCurrentQuestion) ...[
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          Icons.play_arrow,
-                                          size: 16,
-                                          color: Theme.of(context).colorScheme.tertiary,
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${question.question}  ${question.answer}',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.8),
                                         ),
-                                      ],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${question.question}  ${question.answer}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            )),
+                                )),
                           );
                         },
                       ),

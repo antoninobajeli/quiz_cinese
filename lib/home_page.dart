@@ -1176,7 +1176,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
           ),
           NavigationDestination(
             icon: Icon(Icons.list_alt),
-            label: 'Statistiche',
+            label: 'Vocaboli & Stat',
           ),
         ],
       ),

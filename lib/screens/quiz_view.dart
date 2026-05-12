@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';import 'package:package_info_plus/package_info_plus.dart';import '../models.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import '../models.dart';
 
 class QuizView extends StatefulWidget {
   final bool quizStarted;
@@ -51,7 +53,10 @@ class _QuizViewState extends State<QuizView> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.3),
                   Theme.of(context).colorScheme.surface,
                 ],
               ),
@@ -72,17 +77,17 @@ class _QuizViewState extends State<QuizView> {
                   Text(
                     'Sei pronto alla sfida?',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Metti alla prova il tuo cinese e scala la classifica! 🚀',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
@@ -93,7 +98,8 @@ class _QuizViewState extends State<QuizView> {
                       onPressed: widget.onStartQuiz,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -120,8 +126,10 @@ class _QuizViewState extends State<QuizView> {
                       return Text(
                         version,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                         textAlign: TextAlign.center,
                       );
                     },
@@ -136,7 +144,6 @@ class _QuizViewState extends State<QuizView> {
 
     return Stack(
       children: [
-
         // Contenuto principale
         Scaffold(
           appBar: AppBar(
@@ -163,7 +170,8 @@ class _QuizViewState extends State<QuizView> {
               }
 
               if (snapshot.hasError || !snapshot.hasData) {
-                return const Center(child: Text('Errore nel caricamento delle domande.'));
+                return const Center(
+                    child: Text('Errore nel caricamento delle domande.'));
               }
 
               final questions = snapshot.data!;
@@ -177,22 +185,23 @@ class _QuizViewState extends State<QuizView> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: LinearProgressIndicator(
-                        value: ((widget.currentIndex+1)/questions.length),
+                        value: ((widget.currentIndex + 1) / questions.length),
                         minHeight: 12,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.surfaceVariant,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.primary),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Domanda ${widget.currentIndex + 1} di ${questions.length}',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
                       textAlign: TextAlign.end,
                     ),
-
                     Text(
                       current.question,
                       style: Theme.of(context).textTheme.headlineSmall,
@@ -201,9 +210,12 @@ class _QuizViewState extends State<QuizView> {
                     FutureBuilder<QuestionStats>(
                       future: widget.getQuestionStats(current.id),
                       builder: (context, statsSnapshot) {
-                        if (statsSnapshot.connectionState == ConnectionState.done && statsSnapshot.hasData) {
+                        if (statsSnapshot.connectionState ==
+                                ConnectionState.done &&
+                            statsSnapshot.hasData) {
                           final stats = statsSnapshot.data!;
-                          final total = stats.correctAnswers + stats.incorrectAnswers;
+                          final total =
+                              stats.correctAnswers + stats.incorrectAnswers;
                           if (total > 0) {
                             return Text(
                               '(${stats.correctAnswers} corrette, ${stats.incorrectAnswers} sbagliate)',
@@ -230,7 +242,9 @@ class _QuizViewState extends State<QuizView> {
                               : Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: widget.feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
+                            color: widget.feedbackMessage!.contains('corretta')
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                         child: Column(
@@ -238,8 +252,13 @@ class _QuizViewState extends State<QuizView> {
                             Row(
                               children: [
                                 Icon(
-                                  widget.feedbackMessage!.contains('corretta') ? Icons.check_circle : Icons.error,
-                                  color: widget.feedbackMessage!.contains('corretta') ? Colors.green : Colors.red,
+                                  widget.feedbackMessage!.contains('corretta')
+                                      ? Icons.check_circle
+                                      : Icons.error,
+                                  color: widget.feedbackMessage!
+                                          .contains('corretta')
+                                      ? Colors.green
+                                      : Colors.red,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -248,19 +267,26 @@ class _QuizViewState extends State<QuizView> {
                                         ? widget.feedbackMessage!
                                         : 'Risposta errata.',
                                     style: TextStyle(
-                                      color: widget.feedbackMessage!.contains('corretta') ? Colors.green.shade700 : Colors.red.shade700,
+                                      color: widget.feedbackMessage!
+                                              .contains('corretta')
+                                          ? Colors.green.shade700
+                                          : Colors.red.shade700,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            if (widget.feedbackMessage!.contains('Risposta errata'))
+                            if (widget.feedbackMessage!
+                                .contains('Risposta errata'))
                               Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: Center(
                                   child: Text(
-                                    widget.feedbackMessage!.split(':').last.trim(),
+                                    widget.feedbackMessage!
+                                        .split(':')
+                                        .last
+                                        .trim(),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -279,21 +305,28 @@ class _QuizViewState extends State<QuizView> {
                         onPressed: () => widget.onSubmitAnswer(questions),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
                         ),
-                        child: const Text('CONTROLLA', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text('CONTROLLA',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       )
                     else
                       ElevatedButton(
                         onPressed: () => widget.onNextQuestion(questions),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
-                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onSecondary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
                         ),
                         child: Text(
-                          widget.currentIndex + 1 < questions.length ? 'PROSSIMA DOMANDA' : 'VEDI RISULTATO',
+                          widget.currentIndex + 1 < questions.length
+                              ? 'PROSSIMA DOMANDA'
+                              : 'VEDI RISULTATO',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -302,7 +335,8 @@ class _QuizViewState extends State<QuizView> {
                       onPressed: widget.onEndGame,
                       style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.error,
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
                       ),
                       child: const Text(
                         'FINE PARTITA',
@@ -358,9 +392,11 @@ class _QuizViewState extends State<QuizView> {
                       Text(
                         'Quiz Attuale',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
                       ),
                       const Spacer(),
                       IconButton(
@@ -384,19 +420,25 @@ class _QuizViewState extends State<QuizView> {
                       }
 
                       if (snapshot.hasError || !snapshot.hasData) {
-                        return const Center(child: Text('Errore nel caricamento delle domande.'));
+                        return const Center(
+                            child:
+                                Text('Errore nel caricamento delle domande.'));
                       }
 
                       final questions = snapshot.data!;
                       return FutureBuilder<Map<int, QuestionStats>>(
                         future: widget.loadQuestionStatsMap(),
                         builder: (context, statsSnapshot) {
-                          if (statsSnapshot.connectionState != ConnectionState.done) {
-                            return const Center(child: CircularProgressIndicator());
+                          if (statsSnapshot.connectionState !=
+                              ConnectionState.done) {
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
 
                           if (statsSnapshot.hasError) {
-                            return const Center(child: Text('Errore nel caricamento delle statistiche.'));
+                            return const Center(
+                                child: Text(
+                                    'Errore nel caricamento delle statistiche.'));
                           }
 
                           return ListView.builder(
@@ -404,65 +446,84 @@ class _QuizViewState extends State<QuizView> {
                             itemCount: questions.length,
                             itemBuilder: (context, index) {
                               final question = questions[index];
-                              final isCurrentQuestion = index == widget.currentIndex;
+                              final isCurrentQuestion =
+                                  index == widget.currentIndex;
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 color: isCurrentQuestion
-                                    ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer
+                                        .withValues(alpha: 0.3)
                                     : null,
-                                child:
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(20),
-                                  onLongPress: () {
-                                    Clipboard.setData(ClipboardData(text: question.answer));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Risposta "${question.answer}" copiata!'),
-                                        behavior: SnackBarBehavior.floating,
-                                        duration: const Duration(seconds: 1),
-                                      ),
-                                    );
-                                  },
-                                  child:
-                                  Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
+                                child: InkWell(
+                                    borderRadius: BorderRadius.circular(20),
+                                    onLongPress: () {
+                                      Clipboard.setData(
+                                          ClipboardData(text: question.answer));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Risposta "${question.answer}" copiata!'),
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: const Duration(seconds: 1),
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            'Domanda ${index + 1}',
-                                            style: TextStyle(
-                                              fontWeight: isCurrentQuestion ? FontWeight.bold : FontWeight.normal,
-                                              color: isCurrentQuestion
-                                                  ? Theme.of(context).colorScheme.primary
-                                                  : Theme.of(context).colorScheme.onSurface,
-                                            ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'Domanda ${index + 1}',
+                                                style: TextStyle(
+                                                  fontWeight: isCurrentQuestion
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                                  color: isCurrentQuestion
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .primary
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface,
+                                                ),
+                                              ),
+                                              if (isCurrentQuestion) ...[
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  Icons.play_arrow,
+                                                  size: 16,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                ),
+                                              ],
+                                            ],
                                           ),
-                                          if (isCurrentQuestion) ...[
-                                            const SizedBox(width: 8),
-                                            Icon(
-                                              Icons.play_arrow,
-                                              size: 16,
-                                              color: Theme.of(context).colorScheme.primary,
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            question.question +
+                                                "  " +
+                                                question.answer,
+                                            style: TextStyle(
+                                              fontSize: 26,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withValues(alpha: 0.8),
                                             ),
-                                          ],
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ],
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        question.question+"  "+question.answer,
-                                        style: TextStyle(
-                                          fontSize: 26,
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                )),
+                                    )),
                               );
                             },
                           );
