@@ -31,6 +31,38 @@
 
   <title>quizcinese</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('flutter_service_worker.js').then((registration) => {
+          registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed') {
+                if (navigator.serviceWorker.controller) {
+                  // New update available, notify user to refresh
+                  console.log('New content is available; please refresh.');
+                  /*if (confirm('New version available! Refresh to update?')) {
+                    window.location.reload();
+                  }*/
+                }
+              }
+            };
+          };
+        }).catch((error) => {
+          console.error('Error during service worker registration:', error);
+        });
+      });
+    }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+    console.log("ho trovato serviceWorker, avvio la registrazione di timed_worker.js");
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('timed_worker.js');
+      });
+    }
+  </script>
 </head>
 <body>
   <!--
@@ -42,5 +74,24 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+
+    if ('Notification' in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+             console.log('Notification permission granted.');
+
+             /*self.registration.showNotification('Hourly Update', {
+                body: 'This is your scheduled hourly notification.',
+                icon: 'icons/Icon-192.png',
+                badge: 'icons/Icon-192.png'
+              });*/
+
+        }
+      });
+    }
+  </script>
+
+
 </body>
 </html>

@@ -76,7 +76,7 @@ class _DrawingViewState extends State<DrawingView> {
                     ),
                     const SizedBox(height: 40),
                     Text(
-                      'Modalità Drawing 🎮',
+                      '画出汉字 (Huà chū hànzì)\nDisegna il carattere',
                       style:
                           Theme.of(context).textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -274,13 +274,13 @@ class _DrawingViewState extends State<DrawingView> {
                             },
                           ),
 
-                        const SizedBox(height: 24),
+                        //const SizedBox(height: 24),
                         if (widget.feedbackMessage != null)
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color:
-                                  widget.feedbackMessage!.contains('corretto')
+                                  !widget.feedbackMessage!.contains('non è corretto')
                                       ? Colors.green.withValues(alpha: 0.1)
                                       : Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
@@ -290,7 +290,7 @@ class _DrawingViewState extends State<DrawingView> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color:
-                                    widget.feedbackMessage!.contains('corretto')
+                                    !widget.feedbackMessage!.contains('non è corretto')
                                         ? Colors.green.shade700
                                         : Colors.red.shade700,
                                 fontWeight: FontWeight.bold,
@@ -320,7 +320,7 @@ class _DrawingViewState extends State<DrawingView> {
                             ),
                           ),
                         const SizedBox(height: 16),
-                        Spacer(),
+
                         TextButton(
                           onPressed: widget.onEndGame,
                           style: TextButton.styleFrom(

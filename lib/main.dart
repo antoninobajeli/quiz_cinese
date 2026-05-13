@@ -1,8 +1,11 @@
+import 'package:easy_notifications/easy_notifications.dart';
 import 'package:flutter/material.dart';
 
 import 'home_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyNotifications.init();
   runApp(const QuizApp());
 }
 

@@ -1,9 +1,13 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:easy_notifications/easy_notifications.dart';
 import 'package:quizcinese/screens/drawing_view.dart';
+import 'package:web/web.dart' as web;
 
 import 'components/scratch_reveal.dart';
 import 'models.dart';
@@ -39,7 +43,30 @@ class _QuizHomePageState extends State<QuizHomePage> {
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 1));
     _audioPlayer = AudioPlayer();
+    requestNotificationPermission();
+
+
   }
+
+  void requestNotificationPermission() async {
+    final notification = web.Notification;
+
+    if (web.Notification.permission == 'default') {
+      final permission = await web.Notification
+          .requestPermission()
+          .toDart;
+      if (permission == 'granted') {
+        print('Notification permission approved.');
+      }
+    }
+    await EasyNotifications.scheduleMessage(
+      title: 'Reminder',
+      body: 'Time for your meeting!',
+      scheduledDate: DateTime.now().add(Duration(seconds: 10)),
+    );
+    print('message scheduleMessage');
+  }
+
 
   @override
   void dispose() {
@@ -1166,8 +1193,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.history),
-            label: 'Sessioni',
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
           NavigationDestination(
             icon: Icon(Icons.quiz),
@@ -1183,7 +1210,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
           ),
           NavigationDestination(
             icon: Icon(Icons.list_alt),
-            label: 'Vocaboli & Stat',
+            label: 'Vocaboli',
           ),
 
         ],
