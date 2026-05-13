@@ -10,6 +10,7 @@ import 'models.dart';
 import 'screens/quiz_view.dart';
 import 'screens/stats_view.dart';
 import 'screens/scratch_and_guess_view.dart';
+import 'screens/sessions_history_view.dart';
 import 'services/general_controller.dart';
 
 class QuizHomePage extends StatefulWidget {
@@ -1075,13 +1076,14 @@ class _QuizHomePageState extends State<QuizHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quiz Cinese'),
+        title: const Text('Cinese HSK-1'),
       ),
       body: Stack(
         children: [
           IndexedStack(
             index: _currentTabIndex,
             children: [
+              const SessionsHistoryView(),
               QuizView(
                 quizStarted: _controller.quizSession.isStarted,
                 questionsFuture: _controller.quizQuestionsFuture,
@@ -1128,6 +1130,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                     setState(() => _allQuestionsSort = sort),
                 buildQuestionStatsCard: _buildQuestionStatsCard,
               ),
+
             ],
           ),
           Align(
@@ -1163,6 +1166,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
         },
         destinations: const [
           NavigationDestination(
+            icon: Icon(Icons.history),
+            label: 'Sessioni',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.quiz),
             label: 'Quiz',
           ),
@@ -1178,6 +1185,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
             icon: Icon(Icons.list_alt),
             label: 'Vocaboli & Stat',
           ),
+
         ],
       ),
     );

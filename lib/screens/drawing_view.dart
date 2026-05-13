@@ -320,6 +320,7 @@ class _DrawingViewState extends State<DrawingView> {
                             ),
                           ),
                         const SizedBox(height: 16),
+                        Spacer(),
                         TextButton(
                           onPressed: widget.onEndGame,
                           style: TextButton.styleFrom(

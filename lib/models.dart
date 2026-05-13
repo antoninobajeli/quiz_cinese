@@ -98,3 +98,30 @@ class QuestionStats {
     required this.incorrectAnswers,
   });
 }
+
+class QuizSessionSummary {
+  final DateTime timestamp;
+  final int correctCount;
+  final int totalQuestions;
+  final double percentage;
+  final List<QuizAnswer> answers;
+
+  QuizSessionSummary({
+    required this.timestamp,
+    required this.correctCount,
+    required this.totalQuestions,
+    required this.answers,
+  }) : percentage = totalQuestions > 0 ? (correctCount / totalQuestions) : 0.0;
+
+  String get formattedDate => '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+  
+  String get formattedPercentage => '${(percentage * 100).toStringAsFixed(0)}%';
+  
+  String get emoticon {
+    if (percentage == 1.0) return '🏆';
+    if (percentage >= 0.8) return '🌟';
+    if (percentage >= 0.6) return '👍';
+    if (percentage >= 0.4) return '📚';
+    return '💪';
+  }
+}

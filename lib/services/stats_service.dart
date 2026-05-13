@@ -109,4 +109,40 @@ class StatsService {
     sessions.add(jsonEncode(quizSession));
     await prefs.setStringList('quiz_sessions', sessions);
   }
+
+  Future<List<QuizSessionSummary>> loadAllSessions() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessions = prefs.getStringList('quiz_sessions') ?? [];
+      final summaries = <QuizSessionSummary>[];
+
+      for (final sessionJson in sessions) {
+        try {
+          final session = jsonDecode(sessionJson) as Map<String, dynamic>;
+          final timestamp = DateTime.parse(session['timestamp'] as String);
+          final correctCount = session['correctCount'] as int;
+          final totalQuestions = session['totalQuestions'] as int;
+          final answers = (session['answers'] as List<dynamic>?)
+              ?.map((a) => QuizAnswer.fromJson(a as Map<String, dynamic>))
+              .toList() ?? [];
+
+          summaries.add(QuizSessionSummary(
+            timestamp: timestamp,
+            correctCount: correctCount,
+            totalQuestions: totalQuestions,
+            answers: answers,
+          ));
+        } catch (e) {
+          print('Error parsing session: $e');
+        }
+      }
+
+      // Ordina le sessioni per data decrescente (più recenti prima)
+      summaries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      return summaries;
+    } catch (e) {
+      print('Error loading sessions: $e');
+      return [];
+    }
+  }
 }

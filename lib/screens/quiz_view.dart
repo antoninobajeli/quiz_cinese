@@ -384,6 +384,7 @@ class _QuizViewState extends State<QuizView> {
                         ),
                       ),
                     const SizedBox(height: 16),
+                    Spacer(),
                     TextButton(
                       onPressed: widget.onEndGame,
                       style: TextButton.styleFrom(
