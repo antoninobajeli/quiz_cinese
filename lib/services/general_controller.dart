@@ -4,58 +4,58 @@ import '../models.dart';
 import 'quiz_service.dart';
 import 'stats_service.dart';
 import '../sessions/quiz_session.dart';
-import '../sessions/gaming_session.dart';
+import '../sessions/drawing_session.dart';
 
 class GeneralController extends ChangeNotifier {
-  final QuizService _quizService;
+  final QuizService _generalService;
   final StatsService _statsService;
 
   QuizSession quizSession = QuizSession();
-  GamingSession gamingSession = GamingSession();
+  DrawingSession drawingSession = DrawingSession();
   ScratchSession scratchSession = ScratchSession();
 
   Future<List<Question>>? _quizQuestionsFuture;
-  Future<List<Question>>? _gamingQuestionsFuture;
-  Future<List<Question>>? _scratchQuestionsFuture;
+  Future<List<Question>>? _drawingQuestionsFuture;
+  Future<({List<Question> quizQuestions, List<Question> allQuestions})>? _scratchQuestionsFuture;
   late Future<List<Question>> allQuestionsFuture;
 
   Future<List<Question>>? get quizQuestionsFuture => _quizQuestionsFuture;
-  Future<List<Question>>? get gamingQuestionsFuture => _gamingQuestionsFuture;
-  Future<List<Question>>? get scratchQuestionsFuture => _scratchQuestionsFuture;
+  Future<List<Question>>? get drawingQuestionsFuture => _drawingQuestionsFuture;
+  Future<({List<Question> quizQuestions, List<Question> allQuestions})>? get scratchQuestionsFuture => _scratchQuestionsFuture;
 
   GeneralController({
     QuizService? quizService,
     StatsService? statsService,
-  }) : _quizService = quizService ?? QuizService(),
+  }) : _generalService = quizService ?? QuizService(),
        _statsService = statsService ?? StatsService() {
     _loadAllQuestions();
   }
 
   void _loadAllQuestions() {
-    allQuestionsFuture = _quizService.questionRepository.loadAllQuestions();
+    allQuestionsFuture = _generalService.questionRepository.loadAllQuestions();
   }
 
   void startQuiz(int questionCount) {
-    _quizQuestionsFuture = _quizService.loadQuizQuestions(questionCount: questionCount).then((questions) {
-      quizSession.startQuiz(questions);
+    _quizQuestionsFuture = _generalService.loadQuizQuestions(questionCount: questionCount).then((questions) {
+      quizSession.startQuiz(questions.quizQuestions);
       notifyListeners();
-      return questions;
+      return questions.quizQuestions;
     });
     notifyListeners();
   }
 
-  void startGaming(int questionCount) {
-    _gamingQuestionsFuture = _quizService.loadQuizQuestions(questionCount: questionCount).then((questions) {
-      gamingSession.startGaming(questions);
+  void startDrawing(int questionCount) {
+    _drawingQuestionsFuture = _generalService.loadQuizQuestions(questionCount: questionCount).then((questions) {
+      drawingSession.startDrawing(questions.quizQuestions);
       notifyListeners();
-      return questions;
+      return questions.quizQuestions;
     });
     notifyListeners();
   }
 
   void startScratch(int questionCount) {
-    _scratchQuestionsFuture = _quizService.loadQuizQuestions(questionCount: questionCount).then((questions) {
-      scratchSession.startGaming(questions);
+    _scratchQuestionsFuture = _generalService.loadQuizQuestions(questionCount: questionCount).then((questions) {
+      scratchSession.startScratching(questions);
       notifyListeners();
       return questions;
     });
@@ -69,15 +69,15 @@ class GeneralController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void confirmStartGaming(List<Question> questions) {
-    gamingSession.startGaming(questions);
+  void confirmStartDrawing(List<Question> questions) {
+    drawingSession.startDrawing(questions);
     notifyListeners();
   }
-
+/*
   void confirmStartScratch(List<Question> questions) {
-    scratchSession.startGaming(questions);
+    scratchSession.startDrawing(questions);
     notifyListeners();
-  }
+  }*/
 
 
 
@@ -86,8 +86,8 @@ class GeneralController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void submitGamingAnswer(String selectedChar) {
-    gamingSession.submitAnswer(selectedChar);
+  void submitDrawingAnswer(String selectedChar) {
+    drawingSession.submitAnswer(selectedChar);
     notifyListeners();
   }
 
@@ -107,9 +107,9 @@ class GeneralController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void nextGamingQuestion() {
-    if (!gamingSession.nextQuestion()) {
-      // Gaming completed
+  void nextDrawingQuestion() {
+    if (!drawingSession.nextQuestion()) {
+      // Drawing completed
     }
     notifyListeners();
   }
@@ -129,7 +129,7 @@ class GeneralController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void endGaming() {
+  void endDrawing() {
     notifyListeners();
   }
 
@@ -146,9 +146,9 @@ class GeneralController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void restartGaming() {
-    gamingSession.reset();
-    _gamingQuestionsFuture = null;
+  void restartDrawing() {
+    drawingSession.reset();
+    _drawingQuestionsFuture = null;
     notifyListeners();
   }
   void restartScratch() {

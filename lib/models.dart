@@ -86,11 +86,13 @@ class Question {
 }
 
 class QuestionStats {
+  final DateTime lastUpdate;
   final int questionId;
   final int correctAnswers;
   final int incorrectAnswers;
 
   QuestionStats({
+    required this.lastUpdate,
     required this.questionId,
     required this.correctAnswers,
     required this.incorrectAnswers,

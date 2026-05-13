@@ -1,15 +1,17 @@
 import '../models.dart';
 
 class ScratchSession {
-  List<Question> questions = [];
+  List<Question> currPlayQuestions = [];
+  List<Question> kowledgebase = [];
   int currentIndex = 0;
   int correctCount = 0;
   List<QuizAnswer> answers = [];
   String? feedbackMessage;
   bool isStarted = false;
 
-  void startGaming(List<Question> loadedQuestions) {
-    questions = loadedQuestions;
+  void startScratching(({List<Question> allQuestions, List<Question> quizQuestions}) loadedQuestions) {
+    currPlayQuestions = loadedQuestions.quizQuestions;
+    kowledgebase = loadedQuestions.allQuestions;
     currentIndex = 0;
     correctCount = 0;
     answers.clear();
@@ -18,8 +20,8 @@ class ScratchSession {
   }
 
   void submitAnswer(String selectedChar) {
-    final current = questions[currentIndex];
-    // In gaming mode, input is always considered correct as validation happens in UI
+    final current = currPlayQuestions[currentIndex];
+    // In Scratch mode, input is always considered correct as validation happens in UI
 
     final isCorrect = current.answerpinyin!.toLowerCase().compareTo(selectedChar.toLowerCase())==0;
 
@@ -46,16 +48,16 @@ class ScratchSession {
   }
 
   bool nextQuestion() {
-    if (currentIndex + 1 < questions.length) {
+    if (currentIndex + 1 < currPlayQuestions.length) {
       currentIndex += 1;
       feedbackMessage = null;
       return true;
     }
-    return false; // Gaming finished
+    return false; // Scratch finished
   }
 
   void reset() {
-    questions.clear();
+    currPlayQuestions.clear();
     currentIndex = 0;
     correctCount = 0;
     answers.clear();
@@ -63,6 +65,6 @@ class ScratchSession {
     isStarted = false;
   }
 
-  bool get isCompleted => currentIndex >= questions.length - 1 && feedbackMessage != null;
-  int get totalQuestions => questions.length;
+  bool get isCompleted => currentIndex >= currPlayQuestions.length - 1 && feedbackMessage != null;
+  int get totalQuestions => currPlayQuestions.length;
 }

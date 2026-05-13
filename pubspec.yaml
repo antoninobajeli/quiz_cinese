@@ -1,10 +1,10 @@
 name: quizcinese
 description: Un semplice generatore di Quiz basati su domande memorizzate una base di conoscenza di parole e pittogrammi JSON.
 publish_to: 'none'
-version: 0.1.5+1
+version: 0.1.6+1
 
 environment:
-  sdk: '>=2.19.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -17,6 +17,7 @@ dependencies:
   audioplayers: ^6.6.0
   package_info_plus: ^10.1.0
   web_haptics: ^0.0.2
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

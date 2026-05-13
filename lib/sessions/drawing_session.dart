@@ -1,6 +1,6 @@
 import '../models.dart';
 
-class GamingSession {
+class DrawingSession {
   List<Question> questions = [];
   int currentIndex = 0;
   int correctCount = 0;
@@ -8,7 +8,7 @@ class GamingSession {
   String? feedbackMessage;
   bool isStarted = false;
 
-  void startGaming(List<Question> loadedQuestions) {
+  void startDrawing(List<Question> loadedQuestions) {
     questions = loadedQuestions;
     currentIndex = 0;
     correctCount = 0;
@@ -19,7 +19,7 @@ class GamingSession {
 
   void submitAnswer(String selectedChar) {
     final current = questions[currentIndex];
-    // In gaming mode, input is always considered correct as validation happens in UI
+    // In drawing mode, input is always considered correct as validation happens in UI
 
     final isCorrect = current.answer.toLowerCase().contains(selectedChar.toLowerCase());
 
@@ -51,7 +51,7 @@ class GamingSession {
       feedbackMessage = null;
       return true;
     }
-    return false; // Gaming finished
+    return false; // Drawing finished
   }
 
   void reset() {

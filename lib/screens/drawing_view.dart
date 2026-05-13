@@ -6,33 +6,33 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../models.dart';
 
-class GamingView extends StatefulWidget {
-  final bool gamingStarted;
+class DrawingView extends StatefulWidget {
+  final bool drawingStarted;
   final Future<List<Question>>? questionsFuture;
   final int currentIndex;
   final String? feedbackMessage;
-  final VoidCallback onStartGaming;
+  final VoidCallback onStartDrawing;
   final Function(List<Question>, String selectedChar) onSubmitAnswer;
   final Function(List<Question>) onNextQuestion;
   final VoidCallback onEndGame;
 
-  const GamingView({
+  const DrawingView({
     super.key,
-    required this.gamingStarted,
+    required this.drawingStarted,
     required this.questionsFuture,
     required this.currentIndex,
     required this.feedbackMessage,
-    required this.onStartGaming,
+    required this.onStartDrawing,
     required this.onSubmitAnswer,
     required this.onNextQuestion,
     required this.onEndGame,
   });
 
   @override
-  State<GamingView> createState() => _GamingViewState();
+  State<DrawingView> createState() => _DrawingViewState();
 }
 
-class _GamingViewState extends State<GamingView> {
+class _DrawingViewState extends State<DrawingView> {
   final _tecontroller = TextEditingController();
   String? _targetChar;
   final _random = Random();
@@ -76,7 +76,7 @@ class _GamingViewState extends State<GamingView> {
                     ),
                     const SizedBox(height: 40),
                     Text(
-                      'Modalità Gaming 🎮',
+                      'Modalità Drawing 🎮',
                       style:
                           Theme.of(context).textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -98,7 +98,7 @@ class _GamingViewState extends State<GamingView> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: widget.onStartGaming,
+                        onPressed: widget.onStartDrawing,
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.tertiary,
@@ -182,7 +182,7 @@ class _GamingViewState extends State<GamingView> {
                         _isDrawerOpen = true;
                       });
                     },
-                    tooltip: 'Visualizza gaming attuale',
+                    tooltip: 'Visualizza drawing attuale',
                   ),
                 ],
                 backgroundColor: Theme.of(context).colorScheme.surface,
@@ -381,7 +381,7 @@ class _GamingViewState extends State<GamingView> {
                       child: Row(
                         children: [
                           Text(
-                            'Gaming Attuale',
+                            'Drawing Attuale',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleLarge

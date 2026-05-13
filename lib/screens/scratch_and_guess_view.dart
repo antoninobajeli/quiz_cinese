@@ -8,7 +8,7 @@ import '../models.dart';
 
 class StractchAndGuess extends StatefulWidget {
   final bool quizStarted;
-  final Future<List<Question>>? questionsFuture;
+  final Future<({List<Question> quizQuestions, List<Question> allQuestions})>? questionsFuture;
   final int currentIndex;
   final String? feedbackMessage;
   final VoidCallback onStartQuiz;
@@ -167,7 +167,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
             backgroundColor: Theme.of(context).colorScheme.surface,
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
-          body: FutureBuilder<List<Question>>(
+          body: FutureBuilder<({List<Question> quizQuestions, List<Question> allQuestions})>(
             future: widget.questionsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
@@ -180,10 +180,10 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
               }
 
               final questions = snapshot.data!;
-              final current = questions[widget.currentIndex];
+              final current = questions.quizQuestions[widget.currentIndex];
 
               /// mi costruisco la lista fittizia pe rle soluzioni fake
-              List<Question> fakes = List.from(questions);
+              List<Question> fakes = List.from(questions.allQuestions);
 
               // rimuovo dalla fittizia la risposta esatta
               fakes.remove(current);
@@ -199,6 +199,10 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
               final currentfake2 =
                   fakes.elementAt(Random(fakes.length).nextInt(fakes.length));
 
+              List<Question> questBut= new List.from([current,currentfake1,currentfake2]);
+
+              questBut.shuffle();
+
 
               return Padding(
                 padding: const EdgeInsets.all(16),
@@ -208,7 +212,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: LinearProgressIndicator(
-                        value: ((widget.currentIndex + 1) / questions.length),
+                        value: ((widget.currentIndex + 1) / questions.quizQuestions.length),
                         minHeight: 12,
                         backgroundColor:
                             Theme.of(context).colorScheme.surfaceVariant,
@@ -218,7 +222,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Domanda ${widget.currentIndex + 1} di ${questions.length}',
+                      'Domanda ${widget.currentIndex + 1} di ${questions.quizQuestions.length}',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: Theme.of(context).colorScheme.secondary,
                             fontWeight: FontWeight.bold,
@@ -261,20 +265,24 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                         return const SizedBox.shrink();
                       },
                     ),
-                    Text(textAlign: TextAlign.center,
-                      'Indovina quale è il corretto Pinyin\v del carattere che hai scoperto.',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
 
+                    const SizedBox(height: 16),
+                    if (widget.feedbackMessage == null)
+                      Text(textAlign: TextAlign.center,
+                        'Indovina quale è il corretto Pinyin\v del carattere che hai scoperto.',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    if (widget.feedbackMessage == null)
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Spacer(),
                       // Pulsante della domanda
                       ElevatedButton(
                         onPressed: () => widget.onSubmitAnswer(
-                            questions, current.answerpinyin!),
+                            questions.quizQuestions, questBut.elementAt(0).answerpinyin!),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor:
@@ -284,14 +292,14 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text(current.answerpinyin!,
+                        child: Text(questBut.elementAt(0).answerpinyin!,
                             style: TextStyle(
                                 fontSize: 26, fontWeight: FontWeight.bold)),
                       ),
                       Spacer(),
                       ElevatedButton(
                         onPressed: () => widget.onSubmitAnswer(
-                            questions, currentfake1.answerpinyin!),
+                            questions.quizQuestions, questBut.elementAt(1).answerpinyin!),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor:
@@ -301,14 +309,14 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text(currentfake1.answerpinyin!,
+                        child: Text(questBut.elementAt(1).answerpinyin!,
                             style: TextStyle(
                                 fontSize: 26, fontWeight: FontWeight.bold)),
                       ),
                       Spacer(),
                       ElevatedButton(
                         onPressed: () => widget.onSubmitAnswer(
-                            questions, currentfake2.answerpinyin!),
+                            questions.quizQuestions, questBut.elementAt(2).answerpinyin!),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor:
@@ -318,7 +326,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text(currentfake2.answerpinyin!,
+                        child: Text(questBut.elementAt(2).answerpinyin!,
                             style: TextStyle(
                                 fontSize: 26, fontWeight: FontWeight.bold)),
                       ),
@@ -400,7 +408,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                       Text("")
                     else
                       ElevatedButton(
-                        onPressed: () => widget.onNextQuestion(questions),
+                        onPressed: () => widget.onNextQuestion(questions.quizQuestions),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.secondary,
@@ -411,7 +419,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                               borderRadius: BorderRadius.circular(16)),
                         ),
                         child: Text(
-                          widget.currentIndex + 1 < questions.length
+                          widget.currentIndex + 1 < questions.quizQuestions.length
                               ? 'PROSSIMA DOMANDA'
                               : 'VEDI RISULTATO',
                           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -499,7 +507,7 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
                 ),
                 // Lista delle domande
                 Expanded(
-                  child: FutureBuilder<List<Question>>(
+                  child: FutureBuilder<({List<Question> quizQuestions, List<Question> allQuestions})>(
                     future: widget.questionsFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState != ConnectionState.done) {
@@ -524,9 +532,9 @@ class _StractchAndGuessState extends State<StractchAndGuess> {
 
                           return ListView.builder(
                             padding: const EdgeInsets.all(16),
-                            itemCount: questions.length,
+                            itemCount: questions.quizQuestions.length,
                             itemBuilder: (context, index) {
-                              final question = questions[index];
+                              final question = questions.quizQuestions[index];
                               final isCurrentQuestion = index == widget.currentIndex;
 
                               return Card(

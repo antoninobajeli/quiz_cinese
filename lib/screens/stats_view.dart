@@ -45,8 +45,8 @@ class StatsView extends StatelessWidget {
             final stats = statsSnapshot.data!;
             final sortedQuestions = List<Question>.from(questions);
             sortedQuestions.sort((a, b) {
-              final statsA = stats[a.id] ?? QuestionStats(questionId: a.id, correctAnswers: 0, incorrectAnswers: 0);
-              final statsB = stats[b.id] ?? QuestionStats(questionId: b.id, correctAnswers: 0, incorrectAnswers: 0);
+              final statsA = stats[a.id] ?? QuestionStats(lastUpdate:DateTime.now(),questionId: a.id, correctAnswers: 0, incorrectAnswers: 0);
+              final statsB = stats[b.id] ?? QuestionStats(lastUpdate:DateTime.now(),questionId: b.id, correctAnswers: 0, incorrectAnswers: 0);
               final totalA = statsA.correctAnswers + statsA.incorrectAnswers;
               final totalB = statsB.correctAnswers + statsB.incorrectAnswers;
               final ratioA = totalA == 0 ? 0.0 : statsA.correctAnswers / totalA;
@@ -127,7 +127,7 @@ class StatsView extends StatelessWidget {
                     itemCount: sortedQuestions.length,
                     itemBuilder: (context, index) {
                       final question = sortedQuestions[index];
-                      final questionStat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
+                      final questionStat = stats[question.id] ?? QuestionStats(lastUpdate:DateTime.now(),questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
                       return buildQuestionStatsCard(question, questionStat);
                     },
                   ),

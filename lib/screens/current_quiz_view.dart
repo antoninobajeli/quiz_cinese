@@ -74,7 +74,7 @@ class CurrentQuizView extends StatelessWidget {
               itemCount: questions.length,
               itemBuilder: (context, index) {
                 final question = questions[index];
-                final questionStat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
+                final questionStat = stats[question.id] ?? QuestionStats(lastUpdate: DateTime.now(),questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
                 return buildQuestionStatsCard(question, questionStat);
               },
             );

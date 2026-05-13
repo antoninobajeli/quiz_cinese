@@ -31,12 +31,14 @@ class StatsService {
             final existing = stats[answer.questionId];
             if (existing == null) {
               stats[answer.questionId] = QuestionStats(
+                lastUpdate:DateTime.now(),
                 questionId: answer.questionId,
                 correctAnswers: answer.isCorrect ? 1 : 0,
                 incorrectAnswers: answer.isCorrect ? 0 : 1,
               );
             } else {
               stats[answer.questionId] = QuestionStats(
+                lastUpdate:DateTime.now(),
                 questionId: existing.questionId,
                 correctAnswers: existing.correctAnswers + (answer.isCorrect ? 1 : 0),
                 incorrectAnswers: existing.incorrectAnswers + (answer.isCorrect ? 0 : 1),
@@ -87,6 +89,7 @@ class StatsService {
     }
 
     return QuestionStats(
+      lastUpdate:DateTime.now(),
       questionId: questionId,
       correctAnswers: correct,
       incorrectAnswers: incorrect,

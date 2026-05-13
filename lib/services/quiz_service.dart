@@ -18,7 +18,7 @@ class QuizService {
 
   QuestionRepository get questionRepository => _questionRepository;
 
-  Future<List<Question>> loadQuizQuestions({int? questionCount}) async {
+  Future<({List<Question> quizQuestions, List<Question> allQuestions})> loadQuizQuestions({int? questionCount}) async {
     try {
       print('Loading quiz questions...');
       final allQuestions = await _questionRepository.loadAllQuestions();
@@ -28,8 +28,8 @@ class QuizService {
 
       final sortedQuestions = List<Question>.from(allQuestions);
       sortedQuestions.sort((a, b) {
-        final statsA = questionStats[a.id] ?? QuestionStats(questionId: a.id, correctAnswers: 0, incorrectAnswers: 0);
-        final statsB = questionStats[b.id] ?? QuestionStats(questionId: b.id, correctAnswers: 0, incorrectAnswers: 0);
+        final statsA = questionStats[a.id] ?? QuestionStats(lastUpdate:DateTime.now(),questionId: a.id, correctAnswers: 0, incorrectAnswers: 0);
+        final statsB = questionStats[b.id] ?? QuestionStats(lastUpdate:DateTime.now(),questionId: b.id, correctAnswers: 0, incorrectAnswers: 0);
 
         final totalA = statsA.correctAnswers + statsA.incorrectAnswers;
         final totalB = statsB.correctAnswers + statsB.incorrectAnswers;
@@ -44,7 +44,7 @@ class QuizService {
           : sortedQuestions;
 
       print('Selected ${questionsToUse.length} questions for quiz');
-      return questionsToUse;
+      return (quizQuestions: questionsToUse, allQuestions: allQuestions);
     } catch (e) {
       print('Error loading quiz questions: $e');
       rethrow;
@@ -68,7 +68,7 @@ class QuizService {
     while (selected.length < count && remaining.isNotEmpty && attempts < maxAttempts) {
       final weights = <double>[];
       for (final question in remaining) {
-        final stat = stats[question.id] ?? QuestionStats(questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
+        final stat = stats[question.id] ?? QuestionStats(lastUpdate:DateTime.now(),questionId: question.id, correctAnswers: 0, incorrectAnswers: 0);
         final totalAsked = stat.correctAnswers + stat.incorrectAnswers;
         final ratio = totalAsked == 0 ? 0.5 : stat.correctAnswers / totalAsked;
 

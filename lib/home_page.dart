@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:quizcinese/screens/drawing_view.dart';
 
 import 'components/scratch_reveal.dart';
 import 'models.dart';
 import 'screens/quiz_view.dart';
 import 'screens/stats_view.dart';
 import 'screens/scratch_and_guess_view.dart';
-import 'screens/gaming_view.dart';
 import 'services/general_controller.dart';
 
 class QuizHomePage extends StatefulWidget {
@@ -212,7 +212,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     });
   }
 
-  // Gaming Mode Logic
+  // Drawing Mode Logic
   void _askForScratchQuestionCount() {
     showDialog<void>(
       context: context,
@@ -306,8 +306,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-  // Gaming Mode Logic
-  void _askForGamingQuestionCount() {
+  // Drawing Mode Logic
+  void _askForDrawingQuestionCount() {
     showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -336,10 +336,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 childAspectRatio: 1.3,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  _buildGamingCountOption(5, 'Sprint'),
-                  _buildGamingCountOption(10, 'Maratona'),
-                  _buildGamingCountOption(20, 'Elite'),
-                  _buildGamingCountOption(50, 'Leggenda'),
+                  _buildDrawingCountOption(5, 'Sprint'),
+                  _buildDrawingCountOption(10, 'Maratona'),
+                  _buildDrawingCountOption(20, 'Elite'),
+                  _buildDrawingCountOption(50, 'Leggenda'),
                 ],
               ),
               const SizedBox(height: 24),
@@ -354,11 +354,11 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-  Widget _buildGamingCountOption(int count, String label) {
+  Widget _buildDrawingCountOption(int count, String label) {
     return InkWell(
       onTap: () {
         setState(() {
-          _controller.startGaming(count);
+          _controller.startDrawing(count);
         });
         Navigator.of(context).pop();
       },
@@ -400,16 +400,16 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-  void _submitGamingAnswer(List<Question> questions, String selectedChar) {
+  void _submitDrawingAnswer(List<Question> questions, String selectedChar) {
     final current = questions[_controller.quizSession.currentIndex];
     final answer = current.type == QuestionType.text
         ? _answerController.text.trim()
         : _selectedChoice ?? '';
 
-    _controller.submitGamingAnswer(selectedChar);
+    _controller.submitDrawingAnswer(selectedChar);
 
     setState(() {
-      if (_controller.gamingSession.feedbackMessage!.contains('Ottimo')) {
+      if (_controller.drawingSession.feedbackMessage!.contains('Ottimo')) {
         _confettiController.play();
         _audioPlayer.play(AssetSource('success.mp3'));
       }
@@ -445,10 +445,10 @@ class _QuizHomePageState extends State<QuizHomePage> {
     }
   }
 
-  void _nextGamingQuestion(List<Question> questions) {
-    _controller.nextGamingQuestion();
-    if (_controller.gamingSession.isCompleted) {
-      _showGamingScoreDialog(questions.length);
+  void _nextDrawingQuestion(List<Question> questions) {
+    _controller.nextDrawingQuestion();
+    if (_controller.drawingSession.isCompleted) {
+      _showDrawingScoreDialog(questions.length);
     }
   }
 
@@ -603,7 +603,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     );
   }
 
-  void _showGamingScoreDialog(int total) {
+  void _showDrawingScoreDialog(int total) {
     // Salvataggio opzionale per statistiche separate se necessario
     showDialog<void>(
       context: context,
@@ -637,7 +637,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _restartGaming();
+                    _restartDrawing();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -804,9 +804,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
     _showQuizScoreDialog(_controller.quizSession.currentIndex + 1);
   }
 
-  void _endGaming() {
-    _controller.endGaming();
-    _showGamingScoreDialog(_controller.gamingSession.currentIndex + 1);
+  void _endDrawing() {
+    _controller.endDrawing();
+    _showDrawingScoreDialog(_controller.drawingSession.currentIndex + 1);
   }
 
   void _endScratch() {
@@ -823,9 +823,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
     });
   }
 
-  void _restartGaming() {
+  void _restartDrawing() {
     setState(() {
-      _controller.restartGaming();
+      _controller.restartDrawing();
     });
   }
 
@@ -1096,15 +1096,15 @@ class _QuizHomePageState extends State<QuizHomePage> {
                 loadQuestionStatsMap: _loadQuestionStatsMap,
                 buildQuestionStatsCard: _buildQuestionStatsCard,
               ),
-              GamingView(
-                gamingStarted: _controller.gamingSession.isStarted,
-                questionsFuture: _controller.gamingQuestionsFuture,
-                currentIndex: _controller.gamingSession.currentIndex,
-                feedbackMessage: _controller.gamingSession.feedbackMessage,
-                onStartGaming: _askForGamingQuestionCount,
-                onSubmitAnswer: _submitGamingAnswer,
-                onNextQuestion: _nextGamingQuestion,
-                onEndGame: _endGaming,
+              DrawingView(
+                drawingStarted: _controller.drawingSession.isStarted,
+                questionsFuture: _controller.drawingQuestionsFuture,
+                currentIndex: _controller.drawingSession.currentIndex,
+                feedbackMessage: _controller.drawingSession.feedbackMessage,
+                onStartDrawing: _askForDrawingQuestionCount,
+                onSubmitAnswer: _submitDrawingAnswer,
+                onNextQuestion: _nextDrawingQuestion,
+                onEndGame: _endDrawing,
               ),
               StractchAndGuess(
                   quizStarted: _controller.scratchSession.isStarted,
@@ -1167,8 +1167,8 @@ class _QuizHomePageState extends State<QuizHomePage> {
             label: 'Quiz',
           ),
           NavigationDestination(
-            icon: Icon(Icons.sports_esports),
-            label: 'Gaming',
+            icon: Icon(Icons.draw),
+            label: 'Drawing',
           ),
           NavigationDestination(
             icon: Icon(Icons.memory),
