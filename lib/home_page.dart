@@ -1,4 +1,5 @@
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +33,9 @@ class _QuizHomePageState extends State<QuizHomePage> {
   int? _selectedQuestionCount;
   int _currentTabIndex = 0;
   AllQuestionsSortOption _allQuestionsSort = AllQuestionsSortOption.ratio;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController _reminderController = TextEditingController();
+  int? _reminderValue;
   late ConfettiController _confettiController;
   late AudioPlayer _audioPlayer;
 
@@ -75,6 +79,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     _confettiController.dispose();
     _audioPlayer.dispose();
     _answerController.dispose();
+    _reminderController.dispose();
     super.dispose();
   }
 
@@ -219,6 +224,95 @@ class _QuizHomePageState extends State<QuizHomePage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showReminderValueDialog(int value) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reminder impostato'),
+        content: Text('Hai impostato il valore: $value'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsDrawer() {
+    return Drawer(
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Impostazioni',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Reminder',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _reminderController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Valore numerico',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  final value = int.tryParse(_reminderController.text);
+                  if (value != null) {
+                    setState(() {
+                      _reminderValue = value;
+                    });
+                    _showReminderValueDialog(value);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Inserisci un numero valido')),
+                    );
+                  }
+                },
+                child: const Text('Imposta Reminder'),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Azione nulla',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  globalContext.callMethod("registerPeriodicSync" as JSAny);
+                },
+                child: const Text('text'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1102,9 +1196,17 @@ class _QuizHomePageState extends State<QuizHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Cinese HSK-1'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+          ),
+        ],
       ),
+      endDrawer: _buildSettingsDrawer(),
       body: Stack(
         children: [
           IndexedStack(
