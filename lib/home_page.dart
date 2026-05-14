@@ -1206,7 +1206,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
           ),
           NavigationDestination(
             icon: Icon(Icons.memory),
-            label: 'Scratch&Guess',
+            label: 'S & G',
           ),
           NavigationDestination(
             icon: Icon(Icons.list_alt),
