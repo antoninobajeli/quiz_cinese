@@ -93,7 +93,7 @@
                     sendHourlyNotification();
                     await swRegistration.periodicSync.register("send-message", {
                         // Try to update every 30 minutes
-                        minInterval: 0 * 30 * 60 * 1000,
+                        minInterval: 0 * 05 * 60 * 1000,
                     });
                     console.log("Periodic sync registered successfully!");
                 } catch (error) {
@@ -113,7 +113,7 @@
     });
 
     function sendHourlyNotification() {
-      console.log('esecuzione temporizzata da timed sync');
+
       /*if (Notification.permission === 'granted') {
         console.log('showNotification from sendHourlyNotification');
         runtime.register().then(registration => {
@@ -127,15 +127,24 @@
         console.log('sendHourlyNotification NOT SENT');
       }
         */
+
+        console.log('esecuzione temporizzata da timed sync');
         Notification.requestPermission().then((result) => {
           if (result === "granted") {
             navigator.serviceWorker.ready.then((registration) => {
+               registration.showNotification('Bkg Quizzy ..notifica', {
+                  body: 'Ricordati di studiare',
+                  icon: 'icons/Icon-192.png',
+                  badge: 'icons/Icon-192.png'
+                });
               registration.showNotification("Vibration Sample", {
                 body: "Buzz! Buzz!",
                 icon: "../images/touch/chrome-touch-icon-192x192.png",
                 vibrate: [200, 100, 200, 100, 200, 100, 200],
                 tag: "vibration-sample",
               });
+
+
             });
           }
         });
@@ -155,11 +164,8 @@
   -->
   <script src="flutter_bootstrap.js" async></script>
   <script type="module">
-
-
-
     registerPeriodicSync();
-
+    console.log('registrazione chiamata');
 /*
 
         */
