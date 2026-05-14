@@ -35,6 +35,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
   AllQuestionsSortOption _allQuestionsSort = AllQuestionsSortOption.ratio;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _reminderController = TextEditingController();
+  final TextEditingController _eventLogController = TextEditingController();
   int? _reminderValue;
   late ConfettiController _confettiController;
   late AudioPlayer _audioPlayer;
@@ -47,9 +48,37 @@ class _QuizHomePageState extends State<QuizHomePage> {
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 1));
     _audioPlayer = AudioPlayer();
+    _registerJavaScriptEventListener();
     requestNotificationPermission();
 
+  }
 
+  void _registerJavaScriptEventListener() {
+    final document = web.window.document;
+    web.window.addEventListener('click', ((web.Event event) {
+      _addEventLog('click: ${(event.target as web.Element?)?.tagName}');
+    }).toJS);
+    web.window.addEventListener('keydown', ((web.Event event) {
+      final keyEvent = event as web.KeyboardEvent;
+      _addEventLog('keydown: ${keyEvent.key}');
+    }).toJS);
+
+    web.window.addEventListener('message', ((web.Event event) {
+      _addEventLog(event.toString());
+    }).toJS);
+  }
+
+  void _addEventLog(String message) {
+    if (mounted) {
+      setState(() {
+        final timestamp = DateTime.now().toIso8601String();
+        _eventLogController.text = '[$timestamp] $message\n' + _eventLogController.text;
+        if (_eventLogController.text.split('\n').length > 100) {
+          final lines = _eventLogController.text.split('\n');
+          _eventLogController.text = lines.take(100).join('\n');
+        }
+      });
+    }
   }
 
   void requestNotificationPermission() async {
@@ -80,6 +109,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
     _audioPlayer.dispose();
     _answerController.dispose();
     _reminderController.dispose();
+    _eventLogController.dispose();
     super.dispose();
   }
 
@@ -307,9 +337,36 @@ class _QuizHomePageState extends State<QuizHomePage> {
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () {
-                  globalContext.callMethod("registerPeriodicSync" as JSAny);
+                  globalContext.callMethod('registerPeriodicSync' as JSAny);
                 },
                 child: const Text('text'),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Event Log',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextField(
+                    controller: _eventLogController,
+                    readOnly: true,
+                    maxLines: null,
+                    expands: true,
+                    decoration: const InputDecoration(
+                      hintText: 'JavaScript events will appear here...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(8),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
