@@ -337,7 +337,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () {
-                  globalContext.callMethod('registerPeriodicSync' as JSAny);
+                  globalContext.callMethod('registerPeriodicSync' as JSAny).;
                 },
                 child: const Text('text'),
               ),
