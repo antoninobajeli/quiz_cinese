@@ -64,7 +64,7 @@ class _QuizHomePageState extends State<QuizHomePage> {
       body: 'Time for your meeting!',
       scheduledDate: DateTime.now().add(Duration(seconds: 10)),
     );
-    print('message scheduleMessage');
+    print('quiz homepage message scheduleMessage');
   }
 
 

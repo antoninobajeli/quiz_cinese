@@ -56,11 +56,91 @@
     }
   </script>
   <script>
+
     if ('serviceWorker' in navigator) {
-    console.log("ho trovato serviceWorker, avvio la registrazione di timed_worker.js");
+      console.log("ho trovato serviceWorker, avvio la registrazione di timed_worker.js");
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('timed_worker.js');
+        console.log("service loaded");
+        /*navigator.serviceWorker.ready.periodicSync.register('timed_sync.js',{
+            minInterval: 0*0*5*1000,
+        });*/
       });
+    }
+
+    async function registerPeriodicSync() {
+
+    /*
+          navigator.permissions.query({ name: 'periodic-background-sync' })
+        .then((permissionStatus) => {
+          if (permissionStatus.state === 'granted') {
+            // Periodic background sync is granted, you can register a sync event
+            self.registration.periodicSync.register('syncEvent', {
+              // Set the minimum interval for the sync event
+              minInterval: 24 * 60 * 60 * 1000,
+            });
+          }
+        })
+        .catch((error) => {
+          console.error('Error checking permission:', error);
+        });*/
+
+
+         const swRegistration = await navigator.serviceWorker.ready;
+            // Check if Periodic Sync is supported by the browser
+            if ('periodicSync' in swRegistration) {
+                try {
+                    console.log("Sending test message before registering");
+                    sendHourlyNotification();
+                    await swRegistration.periodicSync.register("send-message", {
+                        // Try to update every 30 minutes
+                        minInterval: 0 * 30 * 60 * 1000,
+                    });
+                    console.log("Periodic sync registered successfully!");
+                } catch (error) {
+                    console.error("Periodic sync registration failed:", error);
+                }
+            } else {
+                console.log("Periodic sync is not supported by this browser.");
+            }
+
+    }
+
+    self.addEventListener("periodicsync", (event) => {
+      if (event.tag === "send-message") {
+        //event.waitUntil(updateNews());
+        sendHourlyNotification();
+      }
+    });
+
+    function sendHourlyNotification() {
+      console.log('esecuzione temporizzata da timed sync');
+      /*if (Notification.permission === 'granted') {
+        console.log('showNotification from sendHourlyNotification');
+        runtime.register().then(registration => {
+               registration.showNotification('Bkg Quizzy ..notifica', {
+                  body: 'Ricordati di studiare',
+                  icon: 'icons/Icon-192.png',
+                  badge: 'icons/Icon-192.png'
+                });
+        })
+        }else{
+        console.log('sendHourlyNotification NOT SENT');
+      }
+        */
+        Notification.requestPermission().then((result) => {
+          if (result === "granted") {
+            navigator.serviceWorker.ready.then((registration) => {
+              registration.showNotification("Vibration Sample", {
+                body: "Buzz! Buzz!",
+                icon: "../images/touch/chrome-touch-icon-192x192.png",
+                vibrate: [200, 100, 200, 100, 200, 100, 200],
+                tag: "vibration-sample",
+              });
+            });
+          }
+        });
+
+
     }
   </script>
 </head>
@@ -74,22 +154,20 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
-  <script>
+  <script type="module">
 
-    if ('Notification' in window) {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-             console.log('Notification permission granted.');
 
-             /*self.registration.showNotification('Hourly Update', {
-                body: 'This is your scheduled hourly notification.',
-                icon: 'icons/Icon-192.png',
-                badge: 'icons/Icon-192.png'
-              });*/
 
-        }
-      });
-    }
+    registerPeriodicSync();
+
+/*
+
+        */
+
+
+
+
+
   </script>
 
 

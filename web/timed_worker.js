@@ -18,8 +18,8 @@ function sendHourlyNotification() {
   console.log('esecuzione temporizzata');
   if (Notification.permission === 'granted') {
     console.log('eseguo self.registration.showNotification');
-    self.registration.showNotification('Hourly Update', {
-      body: 'This is your scheduled hourly notification.',
+    self.registration.showNotification('TW Quizzy ..notifica', {
+      body: 'Ricordati di studiare',
       icon: 'icons/Icon-192.png',
       badge: 'icons/Icon-192.png'
     });
